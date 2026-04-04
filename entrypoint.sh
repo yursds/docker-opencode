@@ -1,15 +1,20 @@
 #!/bin/bash
 set -e
 
-cd /workspace
+sudo chown -R hannya:hannya "$HOME" 2>/dev/null || true
 
-# ── OpenCode config ──────────────────────────────────────────────────────────
-CONFIG_DIR="/home/coder/.config/opencode"
-mkdir -p "$CONFIG_DIR"
+cd "$HOME/workspace"
+
+mkdir -p "$HOME/.config/opencode" "$HOME/.local/bin" "$HOME/.local/share"
+
+# Restore generated config from build if not present
+if [ ! -f "$HOME/.config/opencode/opencode.json" ] && [ -d /opt/opencode-config ]; then
+    cp -r /opt/opencode-config/* "$HOME/.config/opencode/" 2>/dev/null || true
+fi
 
 if [ -n "$OPENCODE_CONFIG" ] && [ "$OPENCODE_CONFIG" != "default" ]; then
-    SRC="/workspace/configs/opencode/oh-my-opencode-${OPENCODE_CONFIG}.json"
-    DEST="$CONFIG_DIR/oh-my-opencode.json"
+    SRC="$HOME/workspace/configs/opencode/oh-my-opencode-${OPENCODE_CONFIG}.json"
+    DEST="$HOME/.config/opencode/oh-my-opencode.json"
     if [ -f "$SRC" ]; then
         if [ ! -f "$DEST" ] || [ "$SRC" -nt "$DEST" ]; then
             cp "$SRC" "$DEST"
@@ -17,7 +22,6 @@ if [ -n "$OPENCODE_CONFIG" ] && [ "$OPENCODE_CONFIG" != "default" ]; then
     fi
 fi
 
-# ── uv sync ──────────────────────────────────────────────────────────────────
 if [ -f pyproject.toml ]; then
     if [ ! -d .venv ] || [ ! -f .venv/bin/python ]; then
         uv sync

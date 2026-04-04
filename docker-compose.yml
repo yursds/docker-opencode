@@ -18,22 +18,26 @@ services:
       args:
         MYUID: ${MYUID:-1000}
         MYGID: ${MYGID:-1000}
-    image: ${PROJECT_NAME:-ai-dev}:${COMPOSE_PROFILE:-gpu}
-    container_name: ${PROJECT_NAME:-ai-dev}-${COMPOSE_PROFILE:-gpu}
-    profiles: ["gpu"]
+    image: opencode-uv:${COMPOSE_PROFILE:-gpu}
+    container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-gpu}
+    profiles: [ "gpu" ]
 
     stdin_open: true
     tty: true
 
     volumes:
-      - ${PROJECT_PATH:-.}:/workspace:rw
-      - ./data/opencode/${PROJECT_NAME:-ai-dev}:/home/coder/.config/opencode:rw
-      - ${HOME}/.mujoco:/home/coder/.mujoco:ro
+      - ${PROJECT_PATH:-.}:/home/hannya/workspace:rw
+      - ${HOME}/.mujoco:/home/hannya/.mujoco:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/dri:/dev/dri
 
-    working_dir: /workspace
+    shm_size: "2gb"
+    network_mode: host
+
+    working_dir: /home/hannya/workspace
 
     environment:
-      - HOME=/home/coder
+      - HOME=/home/hannya
       - TERM=xterm-256color
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
@@ -41,7 +45,9 @@ services:
       - OPENCODE_CONFIG=${OPENCODE_CONFIG:-default}
       - XLA_PYTHON_CLIENT_MEM_FRACTION=${XLA_PYTHON_CLIENT_MEM_FRACTION:-0.7}
       - XLA_PYTHON_CLIENT_PREALLOCATE=${XLA_PYTHON_CLIENT_PREALLOCATE:-false}
-      - UV_PROJECT_ENVIRONMENT=/workspace/.venv
+      - UV_PROJECT_ENVIRONMENT=$HOME/workspace/.venv
+      - DISPLAY=${DISPLAY:-}
+      - QT_X11_NO_MITSHM=1
 
     deploy:
       resources:
@@ -49,7 +55,7 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]
+              capabilities: [ gpu ]
 
     security_opt:
       - no-new-privileges:true
@@ -70,29 +76,35 @@ services:
       args:
         MYUID: ${MYUID:-1000}
         MYGID: ${MYGID:-1000}
-    image: ${PROJECT_NAME:-ai-dev}:${COMPOSE_PROFILE:-cpu}
-    container_name: ${PROJECT_NAME:-ai-dev}-${COMPOSE_PROFILE:-cpu}
-    profiles: ["cpu"]
+    image: opencode-uv:${COMPOSE_PROFILE:-cpu}
+    container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-cpu}
+    profiles: [ "cpu" ]
 
     stdin_open: true
     tty: true
 
     volumes:
-      - ${PROJECT_PATH:-.}:/workspace:rw
-      - ./data/opencode/${PROJECT_NAME:-ai-dev}:/home/coder/.config/opencode:rw
-      - ${HOME}/.mujoco:/home/coder/.mujoco:ro
+      - ${PROJECT_PATH:-.}:/home/hannya/workspace:rw
+      - ${HOME}/.mujoco:/home/hannya/.mujoco:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/dri:/dev/dri
 
-    working_dir: /workspace
+    shm_size: "2gb"
+    network_mode: host
+
+    working_dir: /home/hannya/workspace
 
     environment:
-      - HOME=/home/coder
+      - HOME=/home/hannya
       - TERM=xterm-256color
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
       - OPENCODE_CONFIG=${OPENCODE_CONFIG:-default}
       - JAX_PLATFORMS=cpu
-      - UV_PROJECT_ENVIRONMENT=/workspace/.venv
+      - UV_PROJECT_ENVIRONMENT=$HOME/workspace/.venv
+      - DISPLAY=${DISPLAY:-}
+      - QT_X11_NO_MITSHM=1
 
     security_opt:
       - no-new-privileges:true
