@@ -44,8 +44,8 @@ RUN mkdir -p /opt/opencode-config && \
     cp $HOME/.config/opencode/oh-my-openagent.json /opt/opencode-config/oh-my-openagent.json.bak 2>/dev/null || true
 
 # ── User ──────────────────────────────────────────────────────────────────────
-RUN addgroup --gid ${MYGID} ${USERNAME} && \
-    adduser --disabled-password --gecos "" --uid ${MYUID} --gid ${MYGID} ${USERNAME} && \
+RUN getent group ${MYGID} > /dev/null 2>&1 || groupadd -g ${MYGID} ${USERNAME} && \
+    useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME} && \
     mkdir -p /etc/sudoers.d && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
     chmod 0440 /etc/sudoers.d/${USERNAME} && \

@@ -51,10 +51,10 @@ RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) &&
     if [ -z "${OLD_USER}" ]; then \
         EXISTING_GRP=$(getent group ${MYGID} | cut -d: -f1) && \
         if [ -z "$EXISTING_GRP" ]; then \
-            addgroup --gid ${MYGID} ${USERNAME} && \
-            adduser --disabled-password --gecos "" --uid ${MYUID} --gid ${MYGID} ${USERNAME}; \
+            groupadd -g ${MYGID} ${USERNAME} && \
+            useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME}; \
         else \
-            adduser --disabled-password --gecos "" --uid ${MYUID} --gid $EXISTING_GRP ${USERNAME}; \
+            useradd -m -u ${MYUID} -g "$EXISTING_GRP" -s /bin/bash ${USERNAME}; \
         fi; \
     else \
         usermod -l ${USERNAME} "${OLD_USER}" && \
