@@ -104,6 +104,9 @@ jobs:
       - name: Update VERSIONS.md and Dockerfile ARGs
         if: steps.changes.outputs.has_changes == 'true'
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           TODAY=$(date +%Y-%m-%d)
 
           printf '# Tested Versions\n\nLast verified: %s\n\n| Tool | Version | Status |\n|------|---------|--------|\n| uv | %s | OK |\n| Node.js | %s | OK |\n| Bun | %s | OK |\n| OpenCode | %s | OK |\n| oh-my-openagent | %s | OK |\n' \
