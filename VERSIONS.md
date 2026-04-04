@@ -1,11 +1,11 @@
 # Tested Versions
 
-Last verified: 2026-04-05
+Last verified: 2026-04-04
 
 | Tool | Version | Status |
 |------|---------|--------|
-| uv | <current> | OK |
-| Node.js | 20.18.0 | OK |
-| Bun | <current> | OK |
-| OpenCode | <current> | OK |
-| oh-my-openagent | <current> | OK |
+| uv | 0.11.3 | OK |
+| Node.js | 22.22.2 | OK |
+| Bun | bun-v1.3.11 | OK |
+| OpenCode | null | OK |
+| oh-my-openagent | 3.14.0 | OK |
