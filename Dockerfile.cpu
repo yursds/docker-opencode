@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libgl1 libglib2.0-0 libxrender1 libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Node.js 20 ────────────────────────────────────────────────────────────────
-RUN curl -fsSL https://nodejs.org/dist/v20.18.0/node-v20.18.0-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
+# ── Node.js 22 ────────────────────────────────────────────────────────────────
+RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
 # ── uv ────────────────────────────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
