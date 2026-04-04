@@ -5,6 +5,9 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   check-versions:
     runs-on: ubuntu-latest
@@ -13,7 +16,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get latest uv version
         id: uv
@@ -53,14 +56,12 @@ jobs:
           BUN_CURRENT=$(grep '| Bun |' VERSIONS.md | awk '{print $4}')
           OPENCODE_CURRENT=$(grep '| OpenCode |' VERSIONS.md | awk '{print $4}')
           OMA_CURRENT=$(grep '| oh-my-openagent |' VERSIONS.md | awk '{print $4}')
-          DATE_CURRENT=$(grep 'Last verified:' VERSIONS.md | awk '{print $3}')
 
           echo "uv_current=$UV_CURRENT" >> $GITHUB_OUTPUT
           echo "node_current=$NODE_CURRENT" >> $GITHUB_OUTPUT
           echo "bun_current=$BUN_CURRENT" >> $GITHUB_OUTPUT
           echo "opencode_current=$OPENCODE_CURRENT" >> $GITHUB_OUTPUT
           echo "oma_current=$OMA_CURRENT" >> $GITHUB_OUTPUT
-          echo "date_current=$DATE_CURRENT" >> $GITHUB_OUTPUT
 
       - name: Check for version changes
         id: changes
@@ -69,30 +70,33 @@ jobs:
           CHANGES=""
 
           if [ "${{ steps.uv.outputs.version }}" != "${{ steps.current.outputs.uv_current }}" ]; then
-            CHANGES="${CHANGES}uv: ${{ steps.current.outputs.uv_current }} → ${{ steps.uv.outputs.version }}\n"
+            CHANGES="${CHANGES}- uv: ${{ steps.current.outputs.uv_current }} → ${{ steps.uv.outputs.version }}\n"
           fi
 
           if [ "${{ steps.node.outputs.version }}" != "${{ steps.current.outputs.node_current }}" ]; then
-            CHANGES="${CHANGES}Node.js: ${{ steps.current.outputs.node_current }} → ${{ steps.node.outputs.version }}\n"
+            CHANGES="${CHANGES}- Node.js: ${{ steps.current.outputs.node_current }} → ${{ steps.node.outputs.version }}\n"
           fi
 
           if [ "${{ steps.bun.outputs.version }}" != "${{ steps.current.outputs.bun_current }}" ]; then
-            CHANGES="${CHANGES}Bun: ${{ steps.current.outputs.bun_current }} → ${{ steps.bun.outputs.version }}\n"
+            CHANGES="${CHANGES}- Bun: ${{ steps.current.outputs.bun_current }} → ${{ steps.bun.outputs.version }}\n"
           fi
 
           if [ "${{ steps.opencode.outputs.version }}" != "${{ steps.current.outputs.opencode_current }}" ]; then
-            CHANGES="${CHANGES}OpenCode: ${{ steps.current.outputs.opencode_current }} → ${{ steps.opencode.outputs.version }}\n"
+            CHANGES="${CHANGES}- OpenCode: ${{ steps.current.outputs.opencode_current }} → ${{ steps.opencode.outputs.version }}\n"
           fi
 
           if [ "${{ steps.oh-my-openagent.outputs.version }}" != "${{ steps.current.outputs.oma_current }}" ]; then
-            CHANGES="${CHANGES}oh-my-openagent: ${{ steps.current.outputs.oma_current }} → ${{ steps.oh-my-openagent.outputs.version }}\n"
+            CHANGES="${CHANGES}- oh-my-openagent: ${{ steps.current.outputs.oma_current }} → ${{ steps.oh-my-openagent.outputs.version }}\n"
           fi
 
           if [ -n "$CHANGES" ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo -e "changes<<EOF" >> $GITHUB_OUTPUT
-            echo -e "## Version Changes\n\n$CHANGES\n\nUpdated on: $TODAY" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            echo "changes<<CHANGESEOF" >> $GITHUB_OUTPUT
+            echo "## Version Changes" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo -e "$CHANGES" >> $GITHUB_OUTPUT
+            echo "Updated on: $TODAY" >> $GITHUB_OUTPUT
+            echo "CHANGESEOF" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
@@ -120,13 +124,12 @@ jobs:
 
       - name: Create Pull Request
         if: steps.changes.outputs.has_changes == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore: update tool versions'
           title: 'chore: update tool versions'
           body: |
-            ## Summary
-
             ${{ steps.changes.outputs.changes }}
 
             This PR was automatically created by the version check workflow.
