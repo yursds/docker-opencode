@@ -2,43 +2,54 @@
 # Generic AI Dev Container — CPU only
 # ==============================================================================
 
-ARG PYTHON_VERSION=3.11
 ARG UBUNTU_VERSION=24.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
 ARG MYUID=1000
 ARG MYGID=1000
-ARG USERNAME=coder
+ARG USERNAME=hannya
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
 
 # ── System ────────────────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev \
-    python3-pip git curl wget ca-certificates bash-completion \
+    nano git curl wget ca-certificates bash-completion unzip sudo \
     build-essential libgl1 libglib2.0-0 libxrender1 libxext6 \
-    && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 \
-    && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Node.js 20 ────────────────────────────────────────────────────────────────
+RUN curl -fsSL https://nodejs.org/dist/v20.18.0/node-v20.18.0-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
 # ── uv ────────────────────────────────────────────────────────────────────────
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:${PATH}"
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # ── Bun ───────────────────────────────────────────────────────────────────────
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
+RUN curl -fsSL https://bun.sh/install | bash && \
+    cp $HOME/.bun/bin/bun /usr/local/bin/bun && \
+    cp $HOME/.bun/bin/bunx /usr/local/bin/bunx
 
 # ── OpenCode + oh-my-openagent ───────────────────────────────────────────────
 RUN curl -fsSL https://opencode.ai/install | bash
-RUN npm install -g oh-my-opencode
+RUN npm install -g oh-my-opencode oh-my-opencode-linux-x64
+RUN bunx oh-my-opencode install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes
+
+# Ensure opencode binary is on PATH
+RUN cp $HOME/.opencode/bin/opencode /usr/local/bin/opencode
+
+# Save generated config to a safe location (not overwritten by bind mounts)
+RUN mkdir -p /opt/opencode-config && \
+    cp -r $HOME/.config/opencode/* /opt/opencode-config/ 2>/dev/null || true && \
+    cp configs/templates/AGENTS.md-global /opt/opencode-config/AGENTS.md
 
 # ── User ──────────────────────────────────────────────────────────────────────
-RUN groupadd -g ${MYGID} ${USERNAME} 2>/dev/null || true \
-    && useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME} \
-    && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} \
-    && chmod 0440 /etc/sudoers.d/${USERNAME}
+RUN addgroup --gid ${MYGID} ${USERNAME} && \
+    adduser --disabled-password --gecos "" --uid ${MYUID} --gid ${MYGID} ${USERNAME} && \
+    mkdir -p /etc/sudoers.d && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
+    chmod 0440 /etc/sudoers.d/${USERNAME} && \
+    touch /home/${USERNAME}/.sudo_as_admin_successful
 
 ENV TERM=xterm-256color
 ENV SHELL=/bin/bash
