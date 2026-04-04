@@ -1,0 +1,137 @@
+name: Version Check
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest uv version
+        id: uv
+        run: |
+          UV_VERSION=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "version=$UV_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest Node.js version
+        id: node
+        run: |
+          NODE_VERSION=$(curl -sL https://nodejs.org/dist/index.json | jq -r '[.[] | select(.version | startswith("v20") or startswith("v22"))][0].version' | sed 's/^v//')
+          echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest Bun version
+        id: bun
+        run: |
+          BUN_VERSION=$(curl -s https://api.github.com/repos/oven-sh/bun/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "version=$BUN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest OpenCode version
+        id: opencode
+        run: |
+          OPENCODE_VERSION=$(curl -s https://api.github.com/repos/opencode/opencode/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "version=$OPENCODE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest oh-my-openagent version
+        id: oh-my-openagent
+        run: |
+          OMA_VERSION=$(curl -s https://api.github.com/repos/code-yeongyu/oh-my-openagent/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "version=$OMA_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Read current VERSIONS.md
+        id: current
+        run: |
+          UV_CURRENT=$(grep '| uv |' VERSIONS.md | awk '{print $4}')
+          NODE_CURRENT=$(grep '| Node.js |' VERSIONS.md | awk '{print $4}')
+          BUN_CURRENT=$(grep '| Bun |' VERSIONS.md | awk '{print $4}')
+          OPENCODE_CURRENT=$(grep '| OpenCode |' VERSIONS.md | awk '{print $4}')
+          OMA_CURRENT=$(grep '| oh-my-openagent |' VERSIONS.md | awk '{print $4}')
+          DATE_CURRENT=$(grep 'Last verified:' VERSIONS.md | awk '{print $3}')
+
+          echo "uv_current=$UV_CURRENT" >> $GITHUB_OUTPUT
+          echo "node_current=$NODE_CURRENT" >> $GITHUB_OUTPUT
+          echo "bun_current=$BUN_CURRENT" >> $GITHUB_OUTPUT
+          echo "opencode_current=$OPENCODE_CURRENT" >> $GITHUB_OUTPUT
+          echo "oma_current=$OMA_CURRENT" >> $GITHUB_OUTPUT
+          echo "date_current=$DATE_CURRENT" >> $GITHUB_OUTPUT
+
+      - name: Check for version changes
+        id: changes
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          CHANGES=""
+
+          if [ "${{ steps.uv.outputs.version }}" != "${{ steps.current.outputs.uv_current }}" ]; then
+            CHANGES="${CHANGES}uv: ${{ steps.current.outputs.uv_current }} → ${{ steps.uv.outputs.version }}\n"
+          fi
+
+          if [ "${{ steps.node.outputs.version }}" != "${{ steps.current.outputs.node_current }}" ]; then
+            CHANGES="${CHANGES}Node.js: ${{ steps.current.outputs.node_current }} → ${{ steps.node.outputs.version }}\n"
+          fi
+
+          if [ "${{ steps.bun.outputs.version }}" != "${{ steps.current.outputs.bun_current }}" ]; then
+            CHANGES="${CHANGES}Bun: ${{ steps.current.outputs.bun_current }} → ${{ steps.bun.outputs.version }}\n"
+          fi
+
+          if [ "${{ steps.opencode.outputs.version }}" != "${{ steps.current.outputs.opencode_current }}" ]; then
+            CHANGES="${CHANGES}OpenCode: ${{ steps.current.outputs.opencode_current }} → ${{ steps.opencode.outputs.version }}\n"
+          fi
+
+          if [ "${{ steps.oh-my-openagent.outputs.version }}" != "${{ steps.current.outputs.oma_current }}" ]; then
+            CHANGES="${CHANGES}oh-my-openagent: ${{ steps.current.outputs.oma_current }} → ${{ steps.oh-my-openagent.outputs.version }}\n"
+          fi
+
+          if [ -n "$CHANGES" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo -e "changes<<EOF" >> $GITHUB_OUTPUT
+            echo -e "## Version Changes\n\n$CHANGES\n\nUpdated on: $TODAY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update VERSIONS.md and Dockerfile ARGs
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+
+          printf '# Tested Versions\n\nLast verified: %s\n\n| Tool | Version | Status |\n|------|---------|--------|\n| uv | %s | OK |\n| Node.js | %s | OK |\n| Bun | %s | OK |\n| OpenCode | %s | OK |\n| oh-my-openagent | %s | OK |\n' \
+            "$TODAY" \
+            "${{ steps.uv.outputs.version }}" \
+            "${{ steps.node.outputs.version }}" \
+            "${{ steps.bun.outputs.version }}" \
+            "${{ steps.opencode.outputs.version }}" \
+            "${{ steps.oh-my-openagent.outputs.version }}" > VERSIONS.md
+
+          sed -i "s/node-v[0-9.]*\.linux-x64\.tar\.gz/node-v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.cpu
+          sed -i "s/v[0-9.]*\.linux-x64\.tar\.gz/v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.cpu
+
+          if [ -f Dockerfile.gpu ]; then
+            sed -i "s/node-v[0-9.]*\.linux-x64\.tar\.gz/node-v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.gpu
+            sed -i "s/v[0-9.]*\.linux-x64\.tar\.gz/v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.gpu
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore: update tool versions'
+          title: 'chore: update tool versions'
+          body: |
+            ## Summary
+
+            ${{ steps.changes.outputs.changes }}
+
+            This PR was automatically created by the version check workflow.
+          branch: feat/update-versions
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
