@@ -34,17 +34,6 @@ docker exec -it my-project-cpu bash
 
 The entrypoint auto-runs `uv sync` if `pyproject.toml` exists.
 
-### 4. Add agent guidelines (optional)
-
-Copy the bundled template into your project root:
-
-```bash
-cp configs/templates/AGENTS.md-python /path/to/your/repo/AGENTS.md
-```
-
-OpenCode reads `AGENTS.md` from the project root automatically on every session.
-Customize it to match your project's specific conventions.
-
 ---
 
 ## OpenCode Config
@@ -59,11 +48,33 @@ Bundled configs in `configs/opencode/`:
 
 To switch: edit `OPENCODE_CONFIG` in your `.env` and restart the container.
 
+### Switch at runtime
+
+Inside the container, switch configs without restarting:
+
+```bash
+switch-opencode-config free    # Free models only
+switch-opencode-config paid    # GitHub Copilot models
+switch-opencode-config default # Restore installer config
+```
+
 ### No API Keys?
 
 If you leave all API keys empty and use `OPENCODE_CONFIG=free`, everything works — the free tier models (`opencode/*`) don't require any keys.
 
 If you use `OPENCODE_CONFIG=paid` or leave it `default`, you'll need the corresponding API keys set in the `.env` or on the host.
+
+---
+
+## Agent Guidelines
+
+A global `AGENTS.md` is deployed to `~/.config/opencode/AGENTS.md` on first boot.
+It applies to all OpenCode sessions in the container.
+
+For project-specific guidelines, copy a template into your project root:
+```bash
+cp configs/templates/AGENTS.md-python /path/to/your/repo/AGENTS.md
+```
 
 ---
 
@@ -87,13 +98,15 @@ Both run simultaneously — no name collisions.
 
 ## What's Inside
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| **uv** | 0.11.3 | Python package manager |
-| **Node.js** | 20.18.0 | JavaScript runtime (for oh-my-openagent) |
-| **Bun** | latest | JavaScript runtime |
-| **OpenCode** | latest | AI coding agent |
-| **oh-my-openagent** | latest | Agent orchestration layer |
+| Tool | Purpose |
+|------|---------|
+| **uv** | Python package manager |
+| **Node.js** | JavaScript runtime (for oh-my-openagent) |
+| **Bun** | JavaScript runtime |
+| **OpenCode** | AI coding agent |
+| **oh-my-openagent** | Agent orchestration layer |
+
+See `VERSIONS.md` for tested versions.
 
 ---
 
