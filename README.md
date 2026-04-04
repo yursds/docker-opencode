@@ -1,5 +1,8 @@
 # AI Dev Container
 
+![Docker Build](https://github.com/yursds/docker-opencode/actions/workflows/docker-build.yml/badge.svg)
+![Version Check](https://github.com/yursds/docker-opencode/actions/workflows/version-check.yml/badge.svg)
+
 Generic AI-powered development container with OpenCode, uv, Bun, and CUDA support.
 
 ---
