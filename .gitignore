@@ -1,0 +1,14 @@
+# User-specific config — contains personal paths and API keys
+configs/*.env
+!configs/_template.env
+
+# Persistent opencode data — per-project, not shared
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

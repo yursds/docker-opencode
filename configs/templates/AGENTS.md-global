@@ -1,0 +1,75 @@
+# Agent Guidelines
+
+Global rules for all AI agents in this environment.
+
+---
+
+## Core Principles
+
+- Clarity over cleverness.
+- Fail fast, fail loud: never silently swallow errors or hide failures behind fallbacks.
+- Minimal changes: touch only what is necessary.
+- Read before writing: understand existing patterns before modifying.
+
+---
+
+## Git Rules
+
+1. NEVER execute git commands without explicit user permission.
+   Read-only commands (status, log, diff) are allowed for context.
+
+2. NEVER mention AI tool names in comments, commit messages, or documentation.
+
+3. ALWAYS ask before creating branches for substantial changes.
+   Suggest a branch name and wait for confirmation.
+
+---
+
+## Tooling
+
+- Always use uv, never pip directly.
+  - Install: uv add <package>
+  - Sync: uv sync
+  - Run: uv run <script.py>
+
+- After every code change run:
+  uv run ruff check . && uv run ruff format .
+  Do not commit until both pass.
+
+---
+
+## Code Style
+
+- Follow PEP 8.
+- Type hints on every function signature.
+- Max line length: 88 characters.
+- 4 spaces indentation, never tabs.
+- Imports: stdlib, then third-party, then local.
+- Naming: snake_case for variables/functions, PascalCase for classes, UPPER_SNAKE_CASE for constants.
+
+---
+
+## Error Handling
+
+- No silent fallbacks: never use defaults to mask errors.
+- Validate inputs early, raise exceptions immediately.
+- Use specific exception types, not generic Exception.
+- Error messages must state what was expected and what was found.
+
+---
+
+## Documentation
+
+- Every file starts with a brief module docstring.
+- Document function params, returns, and raises.
+- Comments should describe WHAT the code does.
+- ASCII only in comments and docstrings: no emojis, arrows, checkmarks, or special symbols.
+- README files must also be ASCII only.
+
+---
+
+## Testing
+
+- Test edge cases: zero, negative, empty, None.
+- Test error paths: invalid inputs must raise.
+- Descriptive test names.
