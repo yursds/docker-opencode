@@ -1,0 +1,107 @@
+# ==============================================================================
+# AI Dev Container — docker-compose
+# ==============================================================================
+# Usage:
+#   docker compose --env-file configs/<project>.env --profile cpu up -d
+#   docker compose --env-file configs/<project>.env --profile gpu up -d
+#
+# Each project gets its own .env in configs/ with:
+#   PROJECT_NAME, PROJECT_PATH, CONTAINER_SUFFIX
+# This ensures unique image names, container names, and config dirs.
+# ==============================================================================
+
+services:
+  dev-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+      args:
+        MYUID: ${MYUID:-1000}
+        MYGID: ${MYGID:-1000}
+    image: ${PROJECT_NAME:-ai-dev}:${COMPOSE_PROFILE:-gpu}
+    container_name: ${PROJECT_NAME:-ai-dev}-${COMPOSE_PROFILE:-gpu}
+    profiles: ["gpu"]
+
+    stdin_open: true
+    tty: true
+
+    volumes:
+      - ${PROJECT_PATH:-.}:/workspace:rw
+      - ./data/opencode/${PROJECT_NAME:-ai-dev}:/home/coder/.config/opencode:rw
+      - ${HOME}/.mujoco:/home/coder/.mujoco:ro
+
+    working_dir: /workspace
+
+    environment:
+      - HOME=/home/coder
+      - TERM=xterm-256color
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OPENCODE_CONFIG=${OPENCODE_CONFIG:-default}
+      - XLA_PYTHON_CLIENT_MEM_FRACTION=${XLA_PYTHON_CLIENT_MEM_FRACTION:-0.7}
+      - XLA_PYTHON_CLIENT_PREALLOCATE=${XLA_PYTHON_CLIENT_PREALLOCATE:-false}
+      - UV_PROJECT_ENVIRONMENT=/workspace/.venv
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - SYS_PTRACE
+
+    restart: "no"
+
+  dev-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+      args:
+        MYUID: ${MYUID:-1000}
+        MYGID: ${MYGID:-1000}
+    image: ${PROJECT_NAME:-ai-dev}:${COMPOSE_PROFILE:-cpu}
+    container_name: ${PROJECT_NAME:-ai-dev}-${COMPOSE_PROFILE:-cpu}
+    profiles: ["cpu"]
+
+    stdin_open: true
+    tty: true
+
+    volumes:
+      - ${PROJECT_PATH:-.}:/workspace:rw
+      - ./data/opencode/${PROJECT_NAME:-ai-dev}:/home/coder/.config/opencode:rw
+      - ${HOME}/.mujoco:/home/coder/.mujoco:ro
+
+    working_dir: /workspace
+
+    environment:
+      - HOME=/home/coder
+      - TERM=xterm-256color
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OPENCODE_CONFIG=${OPENCODE_CONFIG:-default}
+      - JAX_PLATFORMS=cpu
+      - UV_PROJECT_ENVIRONMENT=/workspace/.venv
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - SYS_PTRACE
+
+    restart: "no"

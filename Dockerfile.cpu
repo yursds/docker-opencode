@@ -1,0 +1,56 @@
+# ==============================================================================
+# Generic AI Dev Container — CPU only
+# ==============================================================================
+
+ARG PYTHON_VERSION=3.11
+ARG UBUNTU_VERSION=24.04
+
+FROM ubuntu:${UBUNTU_VERSION}
+
+ARG MYUID=1000
+ARG MYGID=1000
+ARG USERNAME=coder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ── System ────────────────────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev \
+    python3-pip git curl wget ca-certificates bash-completion \
+    build-essential libgl1 libglib2.0-0 libxrender1 libxext6 \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 \
+    && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python
+
+# ── uv ────────────────────────────────────────────────────────────────────────
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
+# ── Bun ───────────────────────────────────────────────────────────────────────
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
+# ── OpenCode + oh-my-openagent ───────────────────────────────────────────────
+RUN curl -fsSL https://opencode.ai/install | bash
+RUN npm install -g oh-my-opencode
+
+# ── User ──────────────────────────────────────────────────────────────────────
+RUN groupadd -g ${MYGID} ${USERNAME} 2>/dev/null || true \
+    && useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME} \
+    && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME}
+
+ENV TERM=xterm-256color
+ENV SHELL=/bin/bash
+ENV HOME=/home/${USERNAME}
+ENV PATH="/home/${USERNAME}/.local/bin:/home/${USERNAME}/.bun/bin:${PATH}"
+
+WORKDIR /workspace
+
+COPY --chown=${USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER ${USERNAME}
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]
