@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libgl1 libglib2.0-0 libxrender1 libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Node.js 20 ────────────────────────────────────────────────────────────────
+# ── Node.js 22 ────────────────────────────────────────────────────────────────
 RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
 # ── uv ────────────────────────────────────────────────────────────────────────
@@ -49,16 +49,16 @@ RUN mkdir -p /opt/opencode-config && \
 # ── User ──────────────────────────────────────────────────────────────────────
 RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \
     if [ -z "${OLD_USER}" ]; then \
-        EXISTING_GRP=$(getent group ${MYGID} | cut -d: -f1) && \
-        if [ -z "$EXISTING_GRP" ]; then \
-            groupadd -g ${MYGID} ${USERNAME} && \
-            useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME}; \
-        else \
-            useradd -m -u ${MYUID} -g "$EXISTING_GRP" -s /bin/bash ${USERNAME}; \
-        fi; \
+    EXISTING_GRP=$(getent group ${MYGID} | cut -d: -f1) && \
+    if [ -z "$EXISTING_GRP" ]; then \
+    groupadd -g ${MYGID} ${USERNAME} && \
+    useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME}; \
     else \
-        usermod -l ${USERNAME} "${OLD_USER}" && \
-        usermod -d /home/${USERNAME} -m ${USERNAME}; \
+    useradd -m -u ${MYUID} -g "$EXISTING_GRP" -s /bin/bash ${USERNAME}; \
+    fi; \
+    else \
+    usermod -l ${USERNAME} "${OLD_USER}" && \
+    usermod -d /home/${USERNAME} -m ${USERNAME}; \
     fi && \
     mkdir -p /etc/sudoers.d && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \

@@ -41,11 +41,22 @@ RUN cp $HOME/.opencode/bin/opencode /usr/local/bin/opencode
 # Save generated config + templates to a safe location
 RUN mkdir -p /opt/opencode-config && \
     cp -r $HOME/.config/opencode/* /opt/opencode-config/ 2>/dev/null || true && \
-    cp $HOME/.config/opencode/oh-my-openagent.json /opt/opencode-config/oh-my-openagent.json.bak 2>/dev/null || true
+    cp $HOME/.config/opencode/oh-my-opencode.json /opt/opencode-config/oh-my-opencode.json.backup 2>/dev/null || true
 
 # ── User ──────────────────────────────────────────────────────────────────────
-RUN getent group ${MYGID} > /dev/null 2>&1 || groupadd -g ${MYGID} ${USERNAME} && \
-    useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME} && \
+RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \
+    if [ -z "${OLD_USER}" ]; then \
+    EXISTING_GRP=$(getent group ${MYGID} | cut -d: -f1) && \
+    if [ -z "$EXISTING_GRP" ]; then \
+    groupadd -g ${MYGID} ${USERNAME} && \
+    useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME}; \
+    else \
+    useradd -m -u ${MYUID} -g "$EXISTING_GRP" -s /bin/bash ${USERNAME}; \
+    fi; \
+    else \
+    usermod -l ${USERNAME} "${OLD_USER}" && \
+    usermod -d /home/${USERNAME} -m ${USERNAME}; \
+    fi && \
     mkdir -p /etc/sudoers.d && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
     chmod 0440 /etc/sudoers.d/${USERNAME} && \
