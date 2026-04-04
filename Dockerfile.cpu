@@ -38,10 +38,10 @@ RUN bunx oh-my-opencode install --no-tui --claude=no --openai=no --gemini=no --c
 # Ensure opencode binary is on PATH
 RUN cp $HOME/.opencode/bin/opencode /usr/local/bin/opencode
 
-# Save generated config to a safe location (not overwritten by bind mounts)
+# Save generated config + templates to a safe location
 RUN mkdir -p /opt/opencode-config && \
     cp -r $HOME/.config/opencode/* /opt/opencode-config/ 2>/dev/null || true && \
-    cp configs/templates/AGENTS.md-global /opt/opencode-config/AGENTS.md
+    cp $HOME/.config/opencode/oh-my-openagent.json /opt/opencode-config/oh-my-openagent.json.bak 2>/dev/null || true
 
 # ── User ──────────────────────────────────────────────────────────────────────
 RUN addgroup --gid ${MYGID} ${USERNAME} && \
@@ -49,7 +49,8 @@ RUN addgroup --gid ${MYGID} ${USERNAME} && \
     mkdir -p /etc/sudoers.d && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
     chmod 0440 /etc/sudoers.d/${USERNAME} && \
-    touch /home/${USERNAME}/.sudo_as_admin_successful
+    touch /home/${USERNAME}/.sudo_as_admin_successful && \
+    echo 'export PS1="\[\e[01;36m\][DOCKER] \u@\h\[\e[00m\]:\[\e[01;34m\]\w\[\e[00m\]\$ "' >> /home/${USERNAME}/.bashrc
 
 ENV TERM=xterm-256color
 ENV SHELL=/bin/bash
@@ -59,7 +60,15 @@ ENV PATH="/home/${USERNAME}/.local/bin:/home/${USERNAME}/.bun/bin:${PATH}"
 WORKDIR /workspace
 
 COPY --chown=${USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --chown=${USERNAME}:${MYGID} configs/ /opt/project-configs/
+RUN chmod +x /entrypoint.sh && \
+    chmod +x /opt/project-configs/templates/switch-opencode-config.sh && \
+    cp /opt/project-configs/templates/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
+
+# Copy project configs into the safe config dir
+RUN cp /opt/project-configs/opencode/oh-my-opencode-free.json /opt/opencode-config/ 2>/dev/null || true && \
+    cp /opt/project-configs/opencode/oh-my-opencode-paid.json /opt/opencode-config/ 2>/dev/null || true && \
+    cp /opt/project-configs/templates/AGENTS.md-global /opt/opencode-config/AGENTS.md 2>/dev/null || true
 
 USER ${USERNAME}
 
