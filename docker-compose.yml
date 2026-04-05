@@ -20,6 +20,7 @@ services:
         MYGID: ${MYGID:-1000}
     image: opencode-uv:${COMPOSE_PROFILE:-gpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-gpu}
+    hostname: naraku
     profiles: [ "gpu" ]
 
     stdin_open: true
@@ -88,6 +89,7 @@ services:
         MYGID: ${MYGID:-1000}
     image: opencode-uv:${COMPOSE_PROFILE:-cpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-cpu}
+    hostname: naraku
     profiles: [ "cpu" ]
 
     stdin_open: true
