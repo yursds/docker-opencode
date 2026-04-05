@@ -42,7 +42,7 @@ RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) &&
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
     chmod 0440 /etc/sudoers.d/${USERNAME} && \
     touch /home/${USERNAME}/.sudo_as_admin_successful && \
-    echo 'export PS1="\[\e[01;36m\][DOCKER] \u@\h\[\e[00m\]:\[\e[01;34m\]\w\[\e[00m\]\$ "' >> /home/${USERNAME}/.bashrc
+    echo 'export PS1="\[\e[01;36m\][DOCKER]\[\e[00m\] \u@\h:\w\$ "' >> /home/${USERNAME}/.bashrc
 
 # ── Project configs ───────────────────────────────────────────────────────────
 COPY --chown=${USERNAME}:${MYGID} configs/opencode/ /home/${USERNAME}/.config/opencode/

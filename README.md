@@ -22,6 +22,31 @@ PROJECT_PATH=/path/to/your/repo
 OPENCODE_CONFIG=free
 ```
 
+### 1b. Check your user ID
+
+Files created by the container are owned by your user. To avoid ownership mismatches, your container user must have the same UID/GID as your host user.
+
+Open a terminal on your **host** (outside Docker) and run:
+
+```bash
+id
+```
+
+You'll see something like:
+```
+uid=1000(yours) gid=1000(yours) groups=1000(yours),27(sudo)
+```
+
+The numbers `1000` are your UID and GID.
+
+- **If both are 1000**: default values work, no changes needed
+- **If different** (e.g. `uid=1001`): edit your `.env`:
+  ```env
+  MYUID=1001
+  MYGID=1001
+  ```
+  Then rebuild: `docker compose build`
+
 ### 2. Start the container
 
 ```bash
@@ -136,7 +161,7 @@ uv run pytest
 |---------|----------|-------------|
 | `PROJECT_NAME` | Yes | Unique name — used for container naming |
 | `PROJECT_PATH` | Yes | Absolute path to your repo |
-| `MYUID` / `MYGID` | No | User/group ID (default: 1000) |
+| `MYUID` / `MYGID` | No | Must match your host user — run `id` to check (default: 1000) |
 | `OPENCODE_CONFIG` | No | Config preset: `free`, `paid`, `default` |
 | `ANTHROPIC_API_KEY` | No | Anthropic API key |
 | `OPENAI_API_KEY` | No | OpenAI API key |
