@@ -81,7 +81,5 @@ RUN cp /opt/project-configs/opencode/oh-my-opencode-free.json /opt/opencode-conf
     cp /opt/project-configs/opencode/oh-my-opencode-paid.json /opt/opencode-config/ 2>/dev/null || true && \
     cp /opt/project-configs/templates/AGENTS.md-global /opt/opencode-config/AGENTS.md 2>/dev/null || true
 
-USER ${USERNAME}
-
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
