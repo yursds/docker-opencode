@@ -35,7 +35,8 @@ docker compose --env-file configs/my-project.env --profile cpu up -d
 docker exec -it my-project-cpu bash
 ```
 
-The entrypoint auto-runs `uv sync` if `pyproject.toml` exists.
+On first entry, `uv sync` runs automatically if `pyproject.toml` exists in the workspace.
+Otherwise a reminder is printed.
 
 ---
 
@@ -47,7 +48,6 @@ Bundled configs in `configs/opencode/`:
 |-------|--------|----------------|
 | `free` | qwen3.6-plus-free, nemotron, minimax, big-pickle | No |
 | `paid` | GitHub Copilot (Claude, GPT-5, Gemini) | GitHub Copilot token |
-| `default` | Built-in OpenCode defaults | Depends on model |
 
 To switch: edit `OPENCODE_CONFIG` in your `.env` and restart the container.
 
@@ -58,14 +58,13 @@ Inside the container, switch configs without restarting:
 ```bash
 switch-opencode-config free    # Free models only
 switch-opencode-config paid    # GitHub Copilot models
-switch-opencode-config default # Restore installer config
 ```
 
 ### No API Keys?
 
 If you leave all API keys empty and use `OPENCODE_CONFIG=free`, everything works — the free tier models (`opencode/*`) don't require any keys.
 
-If you use `OPENCODE_CONFIG=paid` or leave it `default`, you'll need the corresponding API keys set in the `.env` or on the host.
+If you use `OPENCODE_CONFIG=paid`, you'll need the corresponding API keys set in the `.env`.
 
 ---
 

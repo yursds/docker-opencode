@@ -117,12 +117,10 @@ jobs:
             "${{ steps.opencode.outputs.version }}" \
             "${{ steps.oh-my-openagent.outputs.version }}" > VERSIONS.md
 
-          sed -i "s/node-v[0-9.]*\.linux-x64\.tar\.gz/node-v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.cpu
-          sed -i "s/v[0-9.]*\.linux-x64\.tar\.gz/v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.cpu
+          sed -i "s|node-v[0-9.]*-linux-x64\.tar\.gz|node-v${{ steps.node.outputs.version }}-linux-x64.tar.gz|" Dockerfile.cpu
 
           if [ -f Dockerfile.gpu ]; then
-            sed -i "s/node-v[0-9.]*\.linux-x64\.tar\.gz/node-v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.gpu
-            sed -i "s/v[0-9.]*\.linux-x64\.tar\.gz/v${{ steps.node.outputs.version }}-linux-x64.tar.gz/" Dockerfile.gpu
+            sed -i "s|node-v[0-9.]*-linux-x64\.tar\.gz|node-v${{ steps.node.outputs.version }}-linux-x64.tar.gz|" Dockerfile.gpu
           fi
 
       - name: Create Pull Request
