@@ -4,10 +4,7 @@ set -e
 USERNAME=hannya
 HOME_DIR=/home/$USERNAME
 
-if [ "$(id -u)" = "0" ]; then
-    mkdir -p $HOME_DIR/workspace
-    chown -R ${MYUID:-1000}:${MYGID:-1000} $HOME_DIR
-
+setup_config() {
     if [ "$OPENCODE_CONFIG" = "free" ] || [ "$OPENCODE_CONFIG" = "paid" ]; then
         SRC="$HOME_DIR/.config/opencode/oh-my-openagent-${OPENCODE_CONFIG}.json"
         DEST="$HOME_DIR/.config/opencode/oh-my-openagent.json"
@@ -15,6 +12,23 @@ if [ "$(id -u)" = "0" ]; then
             cp "$SRC" "$DEST"
         fi
     fi
+}
+
+handle_workspace() {
+    mkdir -p $HOME_DIR/workspace
+    cd $HOME_DIR/workspace
+
+    if [ -f "$HOME_DIR/workspace/pyproject.toml" ]; then
+        uv sync
+    else
+        echo "⚠ No pyproject.toml found. This container is designed for uv + OpenCode."
+        echo "  Create a pyproject.toml or run: uv init"
+    fi
+}
+
+if [ "$(id -u)" = "0" ]; then
+    chown -R ${MYUID:-1000}:${MYGID:-1000} $HOME_DIR
+    setup_config
 
     if [ $# -gt 0 ]; then
         CMD="$*"
@@ -22,18 +36,20 @@ if [ "$(id -u)" = "0" ]; then
         CMD="bash"
     fi
 
-    exec su -l $USERNAME -c "cd ~/workspace && $CMD"
-else
-    mkdir -p $HOME_DIR/workspace
-    cd $HOME_DIR/workspace
-
-    if [ "$OPENCODE_CONFIG" = "free" ] || [ "$OPENCODE_CONFIG" = "paid" ]; then
-        SRC="$HOME_DIR/.config/opencode/oh-my-openagent-${OPENCODE_CONFIG}.json"
-        DEST="$HOME_DIR/.config/opencode/oh-my-openagent.json"
-        if [ -f "$SRC" ]; then
-            cp "$SRC" "$DEST"
+    exec su -l $USERNAME -c "
+        mkdir -p ~/workspace
+        cd ~/workspace
+        if [ -f ~/workspace/pyproject.toml ]; then
+            uv sync
+        else
+            echo '⚠ No pyproject.toml found. This container is designed for uv + OpenCode.'
+            echo '  Create a pyproject.toml or run: uv init'
         fi
-    fi
+        $CMD
+    "
+else
+    setup_config
+    handle_workspace
 
     if [ $# -gt 0 ]; then
         CMD="$*"
