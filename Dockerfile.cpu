@@ -11,7 +11,6 @@ ARG MYGID=1000
 ARG USERNAME=hannya
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV HOME=/root
 
 # ── System ────────────────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -24,24 +23,6 @@ RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz |
 
 # ── uv ────────────────────────────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-# ── Bun ───────────────────────────────────────────────────────────────────────
-RUN curl -fsSL https://bun.sh/install | bash && \
-    cp $HOME/.bun/bin/bun /usr/local/bin/bun && \
-    cp $HOME/.bun/bin/bunx /usr/local/bin/bunx
-
-# ── OpenCode + oh-my-openagent ───────────────────────────────────────────────
-RUN curl -fsSL https://opencode.ai/install | bash
-RUN npm install -g oh-my-opencode oh-my-opencode-linux-x64
-RUN bunx oh-my-opencode install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes
-
-# Ensure opencode binary is on PATH
-RUN cp $HOME/.opencode/bin/opencode /usr/local/bin/opencode
-
-# Save generated config + templates to a safe location
-RUN mkdir -p /opt/opencode-config && \
-    cp -r $HOME/.config/opencode/* /opt/opencode-config/ 2>/dev/null || true && \
-    cp $HOME/.config/opencode/oh-my-opencode.json /opt/opencode-config/oh-my-opencode.json.backup 2>/dev/null || true
 
 # ── User ──────────────────────────────────────────────────────────────────────
 RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \
@@ -63,25 +44,35 @@ RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) &&
     touch /home/${USERNAME}/.sudo_as_admin_successful && \
     echo 'export PS1="\[\e[01;36m\][DOCKER] \u@\h\[\e[00m\]:\[\e[01;34m\]\w\[\e[00m\]\$ "' >> /home/${USERNAME}/.bashrc
 
+# ── Project configs ───────────────────────────────────────────────────────────
+COPY --chown=${USERNAME}:${MYGID} configs/opencode/ /home/${USERNAME}/.config/opencode/
+COPY --chown=${USERNAME}:${MYGID} configs/templates/AGENTS.md-global /home/${USERNAME}/.config/opencode/AGENTS.md
+COPY --chown=${USERNAME}:${MYGID} configs/templates/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
+RUN chmod +x /usr/local/bin/switch-opencode-config
+
+# ── Everything else as user ──────────────────────────────────────────────────
+USER ${USERNAME}
+ENV HOME=/home/${USERNAME}
+ENV PATH="/home/${USERNAME}/.opencode/bin:/home/${USERNAME}/.local/bin:/home/${USERNAME}/.bun/bin:${PATH}"
+
+# Bun
+RUN curl -fsSL https://bun.sh/install | bash
+
+# OpenCode
+RUN curl -fsSL https://opencode.ai/install | bash
+
+# oh-my-openagent
+RUN bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
+    cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json
+
+# ── Entrypoint ────────────────────────────────────────────────────────────────
+COPY --chown=${USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 ENV TERM=xterm-256color
 ENV SHELL=/bin/bash
-ENV HOME=/home/${USERNAME}
-ENV PATH="/home/${USERNAME}/.local/bin:/home/${USERNAME}/.bun/bin:${PATH}"
 
 WORKDIR /workspace
-
-COPY --chown=${USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
-COPY --chown=${USERNAME}:${MYGID} configs/ /opt/project-configs/
-RUN chmod +x /entrypoint.sh && \
-    chmod +x /opt/project-configs/templates/switch-opencode-config.sh && \
-    cp /opt/project-configs/templates/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
-
-# Copy project configs into the safe config dir
-RUN cp /opt/project-configs/opencode/oh-my-opencode-free.json /opt/opencode-config/ 2>/dev/null || true && \
-    cp /opt/project-configs/opencode/oh-my-opencode-paid.json /opt/opencode-config/ 2>/dev/null || true && \
-    cp /opt/project-configs/templates/AGENTS.md-global /opt/opencode-config/AGENTS.md 2>/dev/null || true
-
-USER ${USERNAME}
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
