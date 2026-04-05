@@ -28,7 +28,6 @@ services:
 
     volumes:
       - ${PROJECT_PATH:-.}:/home/hannya/workspace:rw
-      - ${HOME}/.mujoco:/home/hannya/.mujoco:ro
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
@@ -39,11 +38,13 @@ services:
 
     environment:
       - HOME=/home/hannya
+      - MYUID=${MYUID:-1000}
+      - MYGID=${MYGID:-1000}
       - TERM=xterm-256color
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
-      - OPENCODE_CONFIG=${OPENCODE_CONFIG:-default}
+      - OPENCODE_CONFIG=free
       - XLA_PYTHON_CLIENT_MEM_FRACTION=${XLA_PYTHON_CLIENT_MEM_FRACTION:-0.7}
       - XLA_PYTHON_CLIENT_PREALLOCATE=${XLA_PYTHON_CLIENT_PREALLOCATE:-false}
       - UV_PROJECT_ENVIRONMENT=$HOME/workspace/.venv
@@ -96,7 +97,6 @@ services:
 
     volumes:
       - ${PROJECT_PATH:-.}:/home/hannya/workspace:rw
-      - ${HOME}/.mujoco:/home/hannya/.mujoco:ro
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
@@ -107,11 +107,13 @@ services:
 
     environment:
       - HOME=/home/hannya
+      - MYUID=${MYUID:-1000}
+      - MYGID=${MYGID:-1000}
       - TERM=xterm-256color
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
-      - OPENCODE_CONFIG=${OPENCODE_CONFIG:-default}
+      - OPENCODE_CONFIG=free
       - JAX_PLATFORMS=cpu
       - UV_PROJECT_ENVIRONMENT=$HOME/workspace/.venv
       - DISPLAY=${DISPLAY:-}
