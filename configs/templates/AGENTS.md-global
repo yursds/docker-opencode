@@ -10,6 +10,7 @@ Global rules for all AI agents in this environment.
 - Fail fast, fail loud: never silently swallow errors or hide failures behind fallbacks.
 - Minimal changes: touch only what is necessary.
 - Read before writing: understand existing patterns before modifying.
+- **No hardcoded values**: all configurable values must be defined as constants, env vars, or in config files. Never inline literals for paths, ports, credentials, model names, or feature flags.
 
 ---
 
