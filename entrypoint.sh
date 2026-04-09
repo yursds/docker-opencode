@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-USERNAME=hannya
-HOME_DIR=/home/$USERNAME
+DOCKER_USERNAME=${DOCKER_USERNAME:-hannya}
+HOME_DIR=/home/$DOCKER_USERNAME
 
 setup_config() {
     if [ "$OPENCODE_CONFIG" = "free" ] || [ "$OPENCODE_CONFIG" = "paid" ]; then
@@ -28,6 +28,14 @@ handle_workspace() {
 
 if [ "$(id -u)" = "0" ]; then
     chown -R ${MYUID:-1000}:${MYGID:-1000} $HOME_DIR
+    
+    mkdir -p "$HOME_DIR"
+    if [ ! -f "$HOME_DIR/.bash_profile" ]; then
+        echo 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' > "$HOME_DIR/.bash_profile"
+    elif ! grep -q 'bashrc' "$HOME_DIR/.bash_profile" 2>/dev/null; then
+        echo 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> "$HOME_DIR/.bash_profile"
+    fi
+    
     setup_config
 
     if [ $# -gt 0 ]; then
@@ -36,7 +44,7 @@ if [ "$(id -u)" = "0" ]; then
         CMD="bash"
     fi
 
-    exec su -l $USERNAME -c "
+    exec su -l $DOCKER_USERNAME -c "
         mkdir -p ~/workspace
         cd ~/workspace
         if [ -f ~/workspace/pyproject.toml ]; then

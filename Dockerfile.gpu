@@ -11,7 +11,7 @@ FROM nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_VERSION}
 
 ARG MYUID=1000
 ARG MYGID=1000
-ARG USERNAME=hannya
+ARG DOCKER_USERNAME=hannya
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -32,20 +32,20 @@ RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) &&
     if [ -z "${OLD_USER}" ]; then \
     EXISTING_GRP=$(getent group ${MYGID} | cut -d: -f1) && \
     if [ -z "$EXISTING_GRP" ]; then \
-    groupadd -g ${MYGID} ${USERNAME} && \
-    useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${USERNAME}; \
+    groupadd -g ${MYGID} ${DOCKER_USERNAME} && \
+    useradd -m -u ${MYUID} -g ${MYGID} -s /bin/bash ${DOCKER_USERNAME}; \
     else \
-    useradd -m -u ${MYUID} -g "$EXISTING_GRP" -s /bin/bash ${USERNAME}; \
+    useradd -m -u ${MYUID} -g "$EXISTING_GRP" -s /bin/bash ${DOCKER_USERNAME}; \
     fi; \
     else \
-    usermod -l ${USERNAME} "${OLD_USER}" && \
-    usermod -d /home/${USERNAME} -m ${USERNAME}; \
+    usermod -l ${DOCKER_USERNAME} "${OLD_USER}" && \
+    usermod -d /home/${DOCKER_USERNAME} -m ${DOCKER_USERNAME}; \
     fi && \
     mkdir -p /etc/sudoers.d && \
-    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
-    chmod 0440 /etc/sudoers.d/${USERNAME} && \
-    touch /home/${USERNAME}/.sudo_as_admin_successful && \
-    echo 'export PS1="\[\e[01;36m\][DOCKER]\[\e[00m\] \u@\h:\w\$ "' >> /home/${USERNAME}/.bashrc
+    echo "${DOCKER_USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${DOCKER_USERNAME} && \
+    chmod 0440 /etc/sudoers.d/${DOCKER_USERNAME} && \
+    touch /home/${DOCKER_USERNAME}/.sudo_as_admin_successful && \
+    echo 'export PS1="\[\e[01;36m\][DOCKER]\[\e[00m\] \u@\h:\w\$ "' >> /home/${DOCKER_USERNAME}/.bashrc
 
 # ── NVIDIA ────────────────────────────────────────────────────────────────────
 ENV NVIDIA_VISIBLE_DEVICES=all
@@ -53,15 +53,15 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
 ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
 
 # ── Project configs ───────────────────────────────────────────────────────────
-COPY --chown=${USERNAME}:${MYGID} configs/opencode/ /home/${USERNAME}/.config/opencode/
-COPY --chown=${USERNAME}:${MYGID} configs/templates/AGENTS.md-global /home/${USERNAME}/.config/opencode/AGENTS.md
-COPY --chown=${USERNAME}:${MYGID} configs/templates/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
+COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/ /home/${DOCKER_USERNAME}/.config/opencode/
+COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/templates/AGENTS.md-global /home/${DOCKER_USERNAME}/.config/opencode/AGENTS.md
+COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/templates/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
 RUN chmod +x /usr/local/bin/switch-opencode-config
 
 # ── Everything else as user ──────────────────────────────────────────────────
-USER ${USERNAME}
-ENV HOME=/home/${USERNAME}
-ENV PATH="/home/${USERNAME}/.opencode/bin:/home/${USERNAME}/.local/bin:/home/${USERNAME}/.bun/bin:${PATH}"
+USER ${DOCKER_USERNAME}
+ENV HOME=/home/${DOCKER_USERNAME}
+ENV PATH="/home/${DOCKER_USERNAME}/.opencode/bin:/home/${DOCKER_USERNAME}/.local/bin:/home/${DOCKER_USERNAME}/.bun/bin:${PATH}"
 
 # Bun
 RUN curl -fsSL https://bun.sh/install | bash
@@ -74,7 +74,7 @@ RUN bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --
     cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
-COPY --chown=${USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
+COPY --chown=${DOCKER_USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENV TERM=xterm-256color
