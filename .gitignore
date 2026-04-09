@@ -5,6 +5,9 @@ configs/*.env
 # Persistent opencode data — per-project, not shared
 data/
 
+# Bash history — per-project per-container, contains personal shell history
+**/.docker-opencode/
+
 # IDE
 .vscode/
 .idea/

@@ -14,6 +14,19 @@ setup_config() {
     fi
 }
 
+setup_bash_history() {
+    # Ensure bash_history is stored in the mounted .docker-opencode folder
+    # This persists across container restarts and is isolated per-project+container
+    if [ -d "$HOME_DIR/.docker-opencode" ]; then
+        if [ ! -f "$HOME_DIR/.docker-opencode/bash_history" ]; then
+            touch "$HOME_DIR/.docker-opencode/bash_history"
+        fi
+        if [ ! -L "$HOME_DIR/.bash_history" ] && [ "$HOME_DIR/.bash_history" != "$HOME_DIR/.docker-opencode/bash_history" ]; then
+            ln -sf "$HOME_DIR/.docker-opencode/bash_history" "$HOME_DIR/.bash_history"
+        fi
+    fi
+}
+
 handle_workspace() {
     mkdir -p $HOME_DIR/workspace
     cd $HOME_DIR/workspace
@@ -37,6 +50,7 @@ if [ "$(id -u)" = "0" ]; then
     fi
     
     setup_config
+    setup_bash_history
 
     if [ $# -gt 0 ]; then
         CMD="$*"
@@ -57,6 +71,7 @@ if [ "$(id -u)" = "0" ]; then
     "
 else
     setup_config
+    setup_bash_history
     handle_workspace
 
     if [ $# -gt 0 ]; then
