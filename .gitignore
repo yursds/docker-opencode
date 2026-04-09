@@ -6,7 +6,7 @@ configs/*.env
 data/
 
 # Bash history — per-project per-container, contains personal shell history
-.docker-opencode/
+.data_history/
 
 # IDE
 .vscode/

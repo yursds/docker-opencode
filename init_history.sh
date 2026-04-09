@@ -10,7 +10,7 @@ for config in configs/*.env; do
     PROJECT_NAME="${PROJECT_NAME:-default}"
     
     for container_type in gpu cpu; do
-        dir=".docker-opencode/${PROJECT_NAME}-${container_type}"
+        dir=".data_history/${PROJECT_NAME}-${container_type}"
         file="$dir/persistent_bash_history"
         
         if [ ! -f "$file" ]; then
