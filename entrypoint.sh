@@ -14,19 +14,6 @@ setup_config() {
     fi
 }
 
-setup_bash_history() {
-    # Ensure bash_history is stored in the mounted .docker-opencode folder
-    # This persists across container restarts and is isolated per-project+container
-    if [ -d "$HOME_DIR/.docker-opencode" ]; then
-        if [ ! -f "$HOME_DIR/.docker-opencode/bash_history" ]; then
-            touch "$HOME_DIR/.docker-opencode/bash_history"
-        fi
-        if [ ! -L "$HOME_DIR/.bash_history" ] && [ "$HOME_DIR/.bash_history" != "$HOME_DIR/.docker-opencode/bash_history" ]; then
-            ln -sf "$HOME_DIR/.docker-opencode/bash_history" "$HOME_DIR/.bash_history"
-        fi
-    fi
-}
-
 handle_workspace() {
     mkdir -p $HOME_DIR/workspace
     cd $HOME_DIR/workspace
@@ -36,6 +23,15 @@ handle_workspace() {
     else
         echo "⚠ No pyproject.toml found. This container is designed for uv + OpenCode."
         echo "  Create a pyproject.toml or run: uv init"
+    fi
+}
+
+setup_bash_history() {
+    if [ -d "$HOME_DIR/.docker-opencode" ] && [ -f "$HOME_DIR/.docker-opencode/bash_history" ]; then
+        if [ ! -L "$HOME_DIR/.bash_history" ]; then
+            rm -f "$HOME_DIR/.bash_history"
+            ln -sf "$HOME_DIR/.docker-opencode/bash_history" "$HOME_DIR/.bash_history"
+        fi
     fi
 }
 
@@ -50,7 +46,6 @@ if [ "$(id -u)" = "0" ]; then
     fi
     
     setup_config
-    setup_bash_history
 
     if [ $# -gt 0 ]; then
         CMD="$*"
@@ -64,8 +59,12 @@ if [ "$(id -u)" = "0" ]; then
         if [ -f ~/workspace/pyproject.toml ]; then
             uv sync
         else
-            echo '⚠ No pyproject.toml found. This container is designed for uv + OpenCode.'
+            echo '[WARN] No pyproject.toml found. This container is designed for uv + OpenCode.'
             echo '  Create a pyproject.toml or run: uv init'
+        fi
+        if [ -d ~/.docker-opencode ] && [ -f ~/.docker-opencode/bash_history ]; then
+            rm -f ~/.bash_history
+            ln -sf ~/.docker-opencode/bash_history ~/.bash_history
         fi
         $CMD
     "

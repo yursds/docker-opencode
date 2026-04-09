@@ -54,7 +54,26 @@ docker compose --env-file configs/my-project.env --profile cpu up -d
 # or --profile gpu for CUDA
 ```
 
-### 3. Enter & work
+### 3. (Optional) Persist bash history
+
+To persist bash history across container restarts, create the volume directory before starting:
+
+```bash
+mkdir -p .docker-opencode/my-project-gpu
+mkdir -p .docker-opencode/my-project-cpu
+touch .docker-opencode/my-project-gpu/bash_history
+touch .docker-opencode/my-project-cpu/bash_history
+```
+
+Or use the helper script:
+
+```bash
+./init.sh configs/my-project.env
+```
+
+Then restart the container. Without this, bash history is not persisted.
+
+### 4. Enter & work
 
 ```bash
 docker exec -it my-project-cpu bash
