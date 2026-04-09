@@ -54,26 +54,7 @@ docker compose --env-file configs/my-project.env --profile cpu up -d
 # or --profile gpu for CUDA
 ```
 
-### 3. (Optional) Persist bash history
-
-To persist bash history across container restarts, create the volume directory before starting:
-
-```bash
-mkdir -p .docker-opencode/my-project-gpu
-mkdir -p .docker-opencode/my-project-cpu
-touch .docker-opencode/my-project-gpu/bash_history
-touch .docker-opencode/my-project-cpu/bash_history
-```
-
-Or use the helper script:
-
-```bash
-./init.sh configs/my-project.env
-```
-
-Then restart the container. Without this, bash history is not persisted.
-
-### 4. Enter & work
+### 3. Enter & work
 
 ```bash
 docker exec -it my-project-cpu bash
@@ -201,9 +182,58 @@ uv run pytest
 
 ---
 
-## Stop & Cleanup
+## Bash History (Optional)
+
+### With persistent bash history
+
+To persist bash history across container restarts, run before starting the container:
 
 ```bash
+./init_history.sh
+```
+
+This creates `.docker-opencode/<project>-gpu/persistent_bash_history` and `.docker-opencode/<project>-cpu/persistent_bash_history` for each project in `configs/*.env`.
+
+### Without persistent bash history
+
+If you don't run `init_history.sh`, the container will still work, but bash history will NOT persist across container restarts.
+
+### Flow
+
+```mermaid
+flowchart TD
+    A[Start container] --> B{Run init_history.sh?}
+    B -->|Yes| C[Creates persistent_bash_history files]
+    B -->|No| D[No persistent files]
+    C --> E[History persists across restarts]
+    D --> F[History NOT persisted]
+```
+
+---
+
+## Troubleshooting
+
+### Container exits immediately
+
+If the container fails to start, check the logs:
+
+```bash
+docker logs <container-name>
+```
+
+**Permission error on bash_history**: If you see errors like `touch: cannot touch '/home/hannya/.docker-opencode/...': Permission denied`, it means Docker created the directory as root. Fix by either:
+
+1. Running `init_history.sh` before starting the container
+2. Or manually:
+   ```bash
+   rm -rf .docker-opencode/<project>-gpu
+   rm -rf .docker-opencode/<project>-cpu
+   ./init_history.sh
+   ```
+
+---
+
+## Stop & Cleanup
 # Stop a specific project
 docker compose --env-file configs/my-project.env down
 

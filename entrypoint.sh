@@ -21,17 +21,8 @@ handle_workspace() {
     if [ -f "$HOME_DIR/workspace/pyproject.toml" ]; then
         uv sync
     else
-        echo "⚠ No pyproject.toml found. This container is designed for uv + OpenCode."
+        echo "[WARN] No pyproject.toml found. This container is designed for uv + OpenCode."
         echo "  Create a pyproject.toml or run: uv init"
-    fi
-}
-
-setup_bash_history() {
-    if [ -d "$HOME_DIR/.docker-opencode" ] && [ -f "$HOME_DIR/.docker-opencode/bash_history" ]; then
-        if [ ! -L "$HOME_DIR/.bash_history" ]; then
-            rm -f "$HOME_DIR/.bash_history"
-            ln -sf "$HOME_DIR/.docker-opencode/bash_history" "$HOME_DIR/.bash_history"
-        fi
     fi
 }
 
@@ -54,23 +45,15 @@ if [ "$(id -u)" = "0" ]; then
     fi
 
     exec su -l $DOCKER_USERNAME -c "
-        mkdir -p ~/workspace
-        cd ~/workspace
-        if [ -f ~/workspace/pyproject.toml ]; then
+        mkdir -p $HOME_DIR/workspace
+        cd $HOME_DIR/workspace
+        if [ -f $HOME_DIR/workspace/pyproject.toml ]; then
             uv sync
-        else
-            echo '[WARN] No pyproject.toml found. This container is designed for uv + OpenCode.'
-            echo '  Create a pyproject.toml or run: uv init'
         fi
-        if [ -d ~/.docker-opencode ] && [ -f ~/.docker-opencode/bash_history ]; then
-            rm -f ~/.bash_history
-            ln -sf ~/.docker-opencode/bash_history ~/.bash_history
-        fi
-        $CMD
+        bash
     "
 else
     setup_config
-    setup_bash_history
     handle_workspace
 
     if [ $# -gt 0 ]; then
