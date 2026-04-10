@@ -1,0 +1,47 @@
+# ==============================================================================
+# Benchmarking Docker Compose - Test OpenCode plugin combinations
+# ==============================================================================
+# Usage:
+#   docker compose -f benchmarking/docker-compose.yml --env-file benchmarking/configs/bench-01.env up -d
+#
+# Create configs in benchmarking/configs/ with:
+#   BENCH_NAME=bench-01
+#   PLUGINS=oh-my-openagent
+#   PLUGINS=graphify,superpowers,gstack
+# ==============================================================================
+
+services:
+  benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile.benchmark
+      args:
+        MYUID: ${MYUID:-1000}
+        MYGID: ${MYGID:-1000}
+        DOCKER_USERNAME: ${DOCKER_USERNAME:-hannya}
+    image: opencode-benchmark:latest
+    container_name: benchmark-${BENCH_NAME:-default}
+
+    stdin_open: true
+    tty: true
+
+    volumes:
+
+      - ./results:/home/${DOCKER_USERNAME:-hannya}/workspace/benchmarking/results
+      - type: bind
+        source: ${HOME:-~}/.gitconfig
+        target: /home/${DOCKER_USERNAME:-hannya}/.gitconfig
+        read_only: true
+
+    working_dir: /home/${DOCKER_USERNAME:-hannya}/workspace/benchmarking
+
+    environment:
+      - HOME=/home/${DOCKER_USERNAME:-hannya}
+      - MYUID=${MYUID:-1000}
+      - MYGID=${MYGID:-1000}
+      - TERM=xterm-256color
+      - BENCH_NAME=${BENCH_NAME:-}
+      - PLUGINS=${PLUGINS:-}
+      - RUN_BENCHMARK=${RUN_BENCHMARK:-false}
+
+    restart: "no"
