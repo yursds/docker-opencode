@@ -50,6 +50,7 @@ switch-opencode-config default # Restore installer config
 - **No hardcoded values**. All configurable values must be defined as constants, env vars, or in config files. Never inline literals for paths, ports, credentials, model names, or feature flags.
 - `configs/*.env` files are gitignored except `_template.env`. Never commit personal configs or API keys.
 - CI triggers on `Dockerfile.*`, `docker-compose.yml`, and workflow changes only.
+- Use only ASCII characters in all files.
 
 ---
 
