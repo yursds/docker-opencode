@@ -5,11 +5,6 @@ configs/*.env
 # Persistent opencode data — per-project, not shared
 data/
 
-# Benchmarking results
-benchmarking/results/
-benchmarking/configs/*.env
-!benchmarking/configs/_template.env
-
 # Bash history — per-project per-container, contains personal shell history
 .data_history/
 
