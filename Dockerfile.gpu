@@ -1,5 +1,6 @@
 ARG CUDA_VERSION=12.6.3
 ARG UBUNTU_VERSION=24.04
+ARG PYTHON_VERSION=3.12
 ARG SKIP_OPENAGENT=false
 
 FROM nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_VERSION}
@@ -22,6 +23,7 @@ RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz |
 
 # ── uv ────────────────────────────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN uv python install ${PYTHON_VERSION} && uv python pin ${PYTHON_VERSION}
 
 # ── User ──────────────────────────────────────────────────────────────────────
 RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \

@@ -1,4 +1,5 @@
 ARG UBUNTU_VERSION=24.04
+ARG PYTHON_VERSION=3.12
 ARG SKIP_OPENAGENT=false
 
 FROM ubuntu:${UBUNTU_VERSION}
@@ -18,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN uv python install ${PYTHON_VERSION} && uv python pin ${PYTHON_VERSION}
 
 RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \
     if [ -z "${OLD_USER}" ]; then \
