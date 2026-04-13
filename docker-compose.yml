@@ -34,16 +34,9 @@ services:
       - ${PROJECT_PATH:-.}:/home/${DOCKER_USERNAME:-hannya}/workspace:rw
       # To disable persistent bash history, comment the line below
       - ./.data_history/${PROJECT_NAME}-gpu:/home/${DOCKER_USERNAME:-hannya}/.data_history
-      - type: bind
-        source: ${HOME:-~}/.gitconfig
-        target: /home/${DOCKER_USERNAME:-hannya}/.gitconfig
-        read_only: true
-        optional: true
-      - type: bind
-        source: ${HOME:-~}/.config/gh
-        target: /home/${DOCKER_USERNAME:-hannya}/.config/gh
-        read_only: true
-        optional: true
+      # Optional: mount host git/gh configs if they exist
+      - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
+      - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
@@ -117,16 +110,9 @@ services:
       - ${PROJECT_PATH:-.}:/home/${DOCKER_USERNAME:-hannya}/workspace:rw
       # To disable persistent bash history, comment the line below
       - ./.data_history/${PROJECT_NAME}-cpu:/home/${DOCKER_USERNAME:-hannya}/.data_history
-      - type: bind
-        source: ${HOME:-~}/.gitconfig
-        target: /home/${DOCKER_USERNAME:-hannya}/.gitconfig
-        read_only: true
-        optional: true
-      - type: bind
-        source: ${HOME:-~}/.config/gh
-        target: /home/${DOCKER_USERNAME:-hannya}/.config/gh
-        read_only: true
-        optional: true
+      # Optional: mount host git/gh configs if they exist
+      - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
+      - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
