@@ -19,6 +19,9 @@ services:
         MYUID: ${MYUID:-1000}
         MYGID: ${MYGID:-1000}
         DOCKER_USERNAME: ${DOCKER_USERNAME:-hannya}
+        UBUNTU_VERSION: ${UBUNTU_VERSION:-24.04}
+        CUDA_VERSION: ${CUDA_VERSION:-12.4.1}
+        SKIP_OPENAGENT: ${SKIP_OPENAGENT:-false}
     image: opencode-uv:${COMPOSE_PROFILE:-gpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-gpu}
     hostname: ${HOSTNAME:-naraku}
@@ -35,10 +38,12 @@ services:
         source: ${HOME:-~}/.gitconfig
         target: /home/${DOCKER_USERNAME:-hannya}/.gitconfig
         read_only: true
+        optional: true
       - type: bind
         source: ${HOME:-~}/.config/gh
         target: /home/${DOCKER_USERNAME:-hannya}/.config/gh
         read_only: true
+        optional: true
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
@@ -98,6 +103,8 @@ services:
         MYUID: ${MYUID:-1000}
         MYGID: ${MYGID:-1000}
         DOCKER_USERNAME: ${DOCKER_USERNAME:-hannya}
+        UBUNTU_VERSION: ${UBUNTU_VERSION:-24.04}
+        SKIP_OPENAGENT: ${SKIP_OPENAGENT:-false}
     image: opencode-uv:${COMPOSE_PROFILE:-cpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-cpu}
     hostname: ${HOSTNAME:-naraku}
@@ -114,10 +121,12 @@ services:
         source: ${HOME:-~}/.gitconfig
         target: /home/${DOCKER_USERNAME:-hannya}/.gitconfig
         read_only: true
+        optional: true
       - type: bind
         source: ${HOME:-~}/.config/gh
         target: /home/${DOCKER_USERNAME:-hannya}/.config/gh
         read_only: true
+        optional: true
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 

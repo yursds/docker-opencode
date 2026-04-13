@@ -137,9 +137,9 @@ No API keys needed for `free` config.
 A global `AGENTS.md` is deployed to `~/.config/opencode/AGENTS.md` on first boot.
 It applies to all OpenCode sessions in the container.
 
-For project-specific guidelines, copy a template into your project root:
+For project-specific guidelines, copy the global AGENTS.md into your project root:
 ```bash
-cp configs/templates/AGENTS.md-python /path/to/your/repo/AGENTS.md
+cp configs/opencode/AGENTS.md-global /path/to/your/repo/AGENTS.md
 ```
 
 ---
@@ -148,11 +148,25 @@ cp configs/templates/AGENTS.md-python /path/to/your/repo/AGENTS.md
 
 | Tool | Purpose |
 |------|---------|
-| **uv** | Python package manager |
+| **uv** | Python package manager (recommended) |
+| **pip** | Python package manager (available but uv preferred) |
+| **direnv** | Environment auto-loader |
 | **Node.js** | JavaScript runtime (for oh-my-openagent) |
 | **Bun** | JavaScript runtime |
 | **OpenCode** | AI coding agent |
-| **oh-my-openagent** | Agent orchestration layer |
+| **oh-my-openagent** | Agent orchestration layer (optional) |
+
+### oh-my-openagent (optional)
+
+Installed by default. To skip:
+
+```bash
+# Via build arg
+docker compose build --build-arg SKIP_OPENAGENT=true
+
+# Or via env file
+echo "SKIP_OPENAGENT=true" >> configs/my-project.env
+```
 
 ### Common Commands
 
@@ -223,6 +237,39 @@ docker compose --env-file configs/my-project.env down --rmi all
 
 # Stop everything at once
 docker compose down
+```
+
+---
+
+## Plugin Testing
+
+Manually test plugin compatibility. Run container, install plugins, test interactively.
+
+### Quick test
+
+```bash
+# Start container
+docker compose --env-file configs/my-project.env --profile cpu up -d
+
+# Enter
+docker exec -it my-project-cpu bash
+```
+
+### Install plugins
+
+```bash
+# oh-my-openagent
+.bun/bin/bunx oh-my-openagent@latest install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes
+
+# superpowers (add to opencode.json)
+```
+
+### Test interactively
+
+```bash
+opencode run "help me plan a feature"
+opencode list agents
+opencode list skills
 ```
 
 ---

@@ -1,8 +1,5 @@
-# ==============================================================================
-# Generic AI Dev Container — CPU only
-# ==============================================================================
-
 ARG UBUNTU_VERSION=24.04
+ARG SKIP_OPENAGENT=false
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -12,19 +9,16 @@ ARG DOCKER_USERNAME=hannya
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# ── System ────────────────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nano git curl wget ca-certificates bash-completion unzip sudo \
     build-essential libgl1 libglib2.0-0 libxrender1 libxext6 \
+    python3-pip direnv \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Node.js 22 ────────────────────────────────────────────────────────────────
 RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
-# ── uv ────────────────────────────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# ── User ──────────────────────────────────────────────────────────────────────
 RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \
     if [ -z "${OLD_USER}" ]; then \
     EXISTING_GRP=$(getent group ${MYGID} | cut -d: -f1) && \
@@ -44,28 +38,23 @@ RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) &&
     touch /home/${DOCKER_USERNAME}/.sudo_as_admin_successful && \
     echo 'export PS1="\[\e[01;36m\][DOCKER]\[\e[00m\] \u@\h:\w\$ "' >> /home/${DOCKER_USERNAME}/.bashrc
 
-# ── Project configs ───────────────────────────────────────────────────────────
 COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/ /home/${DOCKER_USERNAME}/.config/opencode/
-COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/templates/AGENTS.md-global /home/${DOCKER_USERNAME}/.config/opencode/AGENTS.md
-COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/templates/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
+COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/AGENTS.md-global /home/${DOCKER_USERNAME}/.config/opencode/AGENTS.md
+COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
 RUN chmod +x /usr/local/bin/switch-opencode-config
 
-# ── Everything else as user ──────────────────────────────────────────────────
 USER ${DOCKER_USERNAME}
 ENV HOME=/home/${DOCKER_USERNAME}
 ENV PATH="/home/${DOCKER_USERNAME}/.opencode/bin:/home/${DOCKER_USERNAME}/.local/bin:/home/${DOCKER_USERNAME}/.bun/bin:${PATH}"
 
-# Bun
 RUN curl -fsSL https://bun.sh/install | bash
-
-# OpenCode
 RUN curl -fsSL https://opencode.ai/install | bash
 
-# oh-my-openagent
-RUN bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
-    cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json
+RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
+    bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
+    cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json; \
+    fi
 
-# ── Entrypoint ────────────────────────────────────────────────────────────────
 COPY --chown=${DOCKER_USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
