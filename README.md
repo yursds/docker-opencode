@@ -55,6 +55,16 @@ The numbers `1000` are your UID and GID.
   ```
   Then rebuild: `docker compose build`
 
+### Optional: Git/GitHub config
+
+If you don't have GitHub CLI installed or don't want to mount your local git/GitHub config, edit `docker-compose.yml` and comment out these lines:
+
+```yaml
+# Optional: mount host git/gh configs if they exist
+# - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
+# - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
+```
+
 ### 2. Init persistent data (optional)
 
 ```bash
