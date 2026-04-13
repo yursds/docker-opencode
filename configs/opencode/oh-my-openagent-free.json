@@ -2,110 +2,100 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
-      "model": "opencode/qwen3.6-plus-free",
-      "fallback_models": [
-        "opencode/nemotron-3-super-free",
-        "opencode/big-pickle"
-      ]
+      "model": "opencode/big-pickle"
     },
     "hephaestus": {
-      "model": "opencode/qwen3.6-plus-free",
-      "fallback_models": [
-        "opencode/qwen3.6-plus-free",
-        "opencode/nemotron-3-super-free",
-        "opencode/big-pickle"
-      ]
+      "model": "opencode/big-pickle"
     },
     "prometheus": {
-      "model": "opencode/qwen3.6-plus-free",
-      "fallback_models": [
-        "opencode/nemotron-3-super-free",
-        "opencode/big-pickle"
-      ]
+      "model": "opencode/big-pickle"
     },
     "oracle": {
-      "model": "opencode/nemotron-3-super-free",
-      "fallback_models": [
-        "opencode/qwen3.6-plus-free",
-        "opencode/big-pickle"
-      ]
+      "model": "opencode/big-pickle"
     },
     "explore": {
       "model": "opencode/minimax-m2.5-free",
       "fallback_models": [
-        "opencode/big-pickle",
-        "opencode/qwen3.6-plus-free"
+        "opencode/big-pickle"
       ]
     },
     "librarian": {
       "model": "opencode/minimax-m2.5-free",
       "fallback_models": [
-        "opencode/big-pickle",
-        "opencode/qwen3.6-plus-free"
+        "opencode/big-pickle"
       ]
     },
     "multimodal-looker": {
       "model": "opencode/big-pickle",
       "fallback_models": [
-        "opencode/qwen3.6-plus-free",
         "opencode/minimax-m2.5-free"
       ]
     },
     "momus": {
-      "model": "opencode/nemotron-3-super-free",
-      "fallback_models": [
-        "opencode/qwen3.6-plus-free",
-        "opencode/big-pickle"
-      ]
+      "model": "opencode/big-pickle"
     },
     "atlas": {
       "model": "opencode/big-pickle",
       "fallback_models": [
-        "opencode/qwen3.6-plus-free",
         "opencode/nemotron-3-super-free"
       ]
     },
     "metis": {
-      "model": "opencode/qwen3.6-plus-free",
-      "fallback_models": [
-        "opencode/nemotron-3-super-free",
-        "opencode/big-pickle"
-      ]
+      "model": "opencode/big-pickle"
     }
   },
   "categories": {
     "quick": {
       "model": "opencode/minimax-m2.5-free",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     },
     "unspecified-low": {
       "model": "opencode/big-pickle",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     },
     "unspecified-high": {
-      "model": "opencode/qwen3.6-plus-free",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "model": "opencode/big-pickle",
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     },
     "visual-engineering": {
       "model": "opencode/big-pickle",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     },
     "ultrabrain": {
       "model": "opencode/nemotron-3-super-free",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     },
     "deep": {
-      "model": "opencode/qwen3.6-plus-free",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "model": "opencode/big-pickle",
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     },
     "writing": {
       "model": "opencode/big-pickle",
-      "fallback_models": ["google/gemma-3-27b-it"]
+      "fallback_models": [
+        "google/gemma-3-27b-it"
+      ]
     }
   },
   "runtime_fallback": {
     "enabled": true,
-    "retry_on_errors": [400, 429, 503, 529],
+    "retry_on_errors": [
+      400,
+      429,
+      503,
+      529
+    ],
     "max_fallback_attempts": 4,
     "cooldown_seconds": 60,
     "notify_on_fallback": true

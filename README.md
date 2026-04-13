@@ -116,7 +116,7 @@ Bundled configs in `configs/opencode/`:
 
 | Value | Models | API Keys needed |
 |-------|--------|----------------|
-| `free` | qwen3.6-plus-free, nemotron, minimax, big-pickle | No |
+| `free` | nemotron, minimax, big-pickle | No |
 | `paid` | GitHub Copilot (Claude, GPT-5, Gemini) | GitHub Copilot token |
 
 To switch at runtime, inside the container:
