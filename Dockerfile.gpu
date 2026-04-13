@@ -23,7 +23,9 @@ RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz |
 
 # ── uv ────────────────────────────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-RUN uv python install ${PYTHON_VERSION} && uv python pin ${PYTHON_VERSION}
+ENV PATH="/root/.local/bin:${PATH}"
+RUN uv python install ${PYTHON_VERSION} && \
+    echo "${PYTHON_VERSION}" > /root/.python-version
 
 # ── User ──────────────────────────────────────────────────────────────────────
 RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) && \
