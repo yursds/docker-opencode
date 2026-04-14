@@ -23,6 +23,7 @@ services:
         CUDA_VERSION: ${CUDA_VERSION:-12.4.1}
         PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
         SKIP_OPENAGENT: ${SKIP_OPENAGENT:-false}
+        SKIP_GRAPHIFY: ${SKIP_GRAPHIFY:-false}
     image: opencode-uv:${COMPOSE_PROFILE:-gpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-gpu}
     hostname: ${HOSTNAME:-naraku}
@@ -100,6 +101,7 @@ services:
         UBUNTU_VERSION: ${UBUNTU_VERSION:-24.04}
         PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
         SKIP_OPENAGENT: ${SKIP_OPENAGENT:-false}
+        SKIP_GRAPHIFY: ${SKIP_GRAPHIFY:-false}
     image: opencode-uv:${COMPOSE_PROFILE:-cpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-cpu}
     hostname: ${HOSTNAME:-naraku}

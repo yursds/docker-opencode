@@ -2,6 +2,7 @@ ARG CUDA_VERSION=12.6.3
 ARG UBUNTU_VERSION=24.04
 ARG PYTHON_VERSION=3.12
 ARG SKIP_OPENAGENT=false
+ARG SKIP_GRAPHIFY=false
 
 FROM nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_VERSION}
 
@@ -73,6 +74,12 @@ RUN curl -fsSL https://opencode.ai/install | bash
 RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
     bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
     cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json; \
+    fi
+
+# graphify skill
+RUN if [ "${SKIP_GRAPHIFY}" != "true" ]; then \
+    pip install graphifyy && \
+    graphify install --platform opencode; \
     fi
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
