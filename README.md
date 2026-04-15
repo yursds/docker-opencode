@@ -9,6 +9,7 @@ Generic AI-powered development container with OpenCode, uv, Bun, and CUDA suppor
 - [Configuration](#configuration)
 - [Agent Guidelines](#agent-guidelines)
 - [What's Inside](#whats-inside)
+- [Skills / Plugins](#skills--plugins)
 - [Bash History](#bash-history-optional)
 - [Troubleshooting](#troubleshooting)
 - [References](#references)
@@ -195,6 +196,49 @@ uv run pytest
 ```
 
 See `VERSIONS.md` for tested versions.
+
+---
+
+## Skills / Plugins
+
+This container includes OpenCode skills/plugins for enhanced functionality. To disable them at build time, add to your project `.env`:
+
+```env
+SKIP_GRAPHIFY=true    # Skip graphify skill
+SKIP_OPENAGENT=true   # Skip oh-my-openagent plugin
+```
+
+Then rebuild:
+```bash
+docker compose --env-file configs/my-project.env --profile cpu build
+# or --profile gpu for CUDA
+```
+
+### graphify
+
+Turn any folder of files into a navigable knowledge graph with community detection, audit trail, and three outputs: interactive HTML, GraphRAG-ready JSON, and a plain-language GRAPH_REPORT.md.
+
+**Trigger:** `/graphify`
+
+```
+/graphify <path>                                      # full pipeline
+/graphify <path> --mode deep                         # thorough extraction
+/graphify <path> --update                            # incremental update
+/graphify <path> --directed                          # build directed graph
+/graphify <path> --svg                               # export graph.svg
+/graphify <path> --neo4j                             # generate Cypher for Neo4j
+/graphify <path> --wiki                              # build agent-crawlable wiki
+/graphify query "<question>"                         # BFS traversal
+/graphify path "Concept A" "Concept B"              # shortest path
+/graphify explain "Concept"                          # explain a node
+```
+
+**What graphify does:**
+- Persistent graph - relationships survive across sessions
+- Honest audit trail - every edge tagged EXTRACTED, INFERRED, or AMBIGUOUS
+- Cross-document surprise - community detection finds hidden connections
+
+See `~/.config/opencode/skills/graphify/SKILL.md` for full documentation.
 
 ---
 
