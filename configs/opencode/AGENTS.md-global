@@ -29,13 +29,20 @@ Global rules for all AI agents in this environment.
 ## Tooling
 
 - Always use uv, never pip directly.
-  - Install: uv add <package>
+  - Install: uv add `<package>`
   - Sync: uv sync
-  - Run: uv run <script.py>
+  - Run: uv run `<script.py>`
 
 - After every code change run:
   uv run ruff check . && uv run ruff format .
   Do not commit until both pass.
+
+---
+
+## Skills
+
+- **graphify** (`~/.config/opencode/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
+  When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
 
 ---
 

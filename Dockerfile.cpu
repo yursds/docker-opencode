@@ -1,6 +1,7 @@
 ARG UBUNTU_VERSION=24.04
 ARG PYTHON_VERSION=3.12
 ARG SKIP_OPENAGENT=false
+ARG SKIP_GRAPHIFY=false
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -58,6 +59,12 @@ RUN curl -fsSL https://opencode.ai/install | bash
 RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
     bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
     cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json; \
+    fi
+
+# graphify skill
+RUN if [ "${SKIP_GRAPHIFY}" != "true" ]; then \
+    pip install graphifyy && \
+    graphify install --platform opencode; \
     fi
 
 COPY --chown=${DOCKER_USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
