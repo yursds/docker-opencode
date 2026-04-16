@@ -71,7 +71,7 @@ RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
 
 # graphify skill
 RUN if [ "${SKIP_GRAPHIFY}" != "true" ]; then \
-    uv pip install --system graphifyy && \
+    uv pip install --system --break-system-packages graphifyy && \
     graphify install --platform opencode; \
     fi
 
