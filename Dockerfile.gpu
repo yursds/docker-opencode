@@ -12,6 +12,13 @@ ARG DOCKER_USERNAME=hannya
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Fix apt sources (works for all Ubuntu versions)
+RUN rm -f /etc/apt/sources.list.d/*.list && \
+    CODENAME=$(. /etc/os-release && echo $VERSION_CODENAME) && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ $CODENAME-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ $CODENAME-security main restricted universe multiverse" >> /etc/apt/sources.list
+
 # ── System ────────────────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nano git curl wget ca-certificates bash-completion unzip sudo \
