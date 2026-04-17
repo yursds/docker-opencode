@@ -15,7 +15,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt \
     apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates nano wget git bash-completion unzip sudo build-essential
+    curl ca-certificates nano wget git bash-completion unzip sudo build-essential \
+    xclip xsel xvfb
 
 # ── Node.js 22 ────────────────────────────────────────────────────────────────
 RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
