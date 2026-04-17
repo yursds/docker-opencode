@@ -1,12 +1,12 @@
 ARG UBUNTU_VERSION=24.04
-ARG PYTHON_VERSION=3.12
-ARG SKIP_OPENAGENT=false
 
 FROM ubuntu:${UBUNTU_VERSION}
 
 ARG MYUID=1000
 ARG MYGID=1000
 ARG DOCKER_USERNAME=hannya
+ARG PYTHON_VERSION=3.12
+ARG SKIP_OPENAGENT=false
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -44,6 +44,7 @@ RUN OLD_USER=$(awk -v uid="${MYUID}" -F ':' '$3==uid {print $1}' /etc/passwd) &&
     touch /home/${DOCKER_USERNAME}/.sudo_as_admin_successful && \
     echo 'export PS1="\[\e[01;36m\][DOCKER]\[\e[00m\] \u@\h:\w\$ "' >> /home/${DOCKER_USERNAME}/.bashrc
 
+# ── Project configs ───────────────────────────────────────────────────────────
 COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/ /home/${DOCKER_USERNAME}/.config/opencode/
 COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/AGENTS.md-global /home/${DOCKER_USERNAME}/.config/opencode/AGENTS.md
 COPY --chown=${DOCKER_USERNAME}:${MYGID} configs/opencode/switch-opencode-config.sh /usr/local/bin/switch-opencode-config
@@ -56,7 +57,11 @@ ENV PATH="/home/${DOCKER_USERNAME}/.opencode/bin:/home/${DOCKER_USERNAME}/.local
 RUN curl -fsSL https://bun.sh/install | bash
 RUN curl -fsSL https://opencode.ai/install | bash
 
-RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
+# oh-my-openagent (--build-arg SKIP_OPENAGENT=true)
+RUN echo "SKIP_OPENAGENT value: $SKIP_OPENAGENT" && \
+    if [ "$SKIP_OPENAGENT" = "true" ]; then \
+    echo "Skipping oh-my-openagent installation"; \
+    else \
     bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
     cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json; \
     fi

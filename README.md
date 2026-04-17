@@ -49,12 +49,34 @@ uid=1000(yours) gid=1000(yours) groups=1000(yours),27(sudo)
 The numbers `1000` are your UID and GID.
 
 - **If both are 1000**: default values work, no changes needed
-- **If different** (e.g. `uid=1001`): edit your `.env`:
-  ```env
-  MYUID=1001
-  MYGID=1001
+- **If different** (e.g. `uid=1001`): create a root `.env` file:
+  ```bash
+  # Create .env in project root (same dir as docker-compose.yml)
+  echo "MYUID=1001" > .env
+  echo "MYGID=1001" >> .env
   ```
   Then rebuild: `docker compose build`
+
+### 1c. Customize build (optional)
+
+To override build-time variables, create a root `.env` file:
+
+```bash
+# Example: override Ubuntu version, CUDA, and Python
+echo "UBUNTU_VERSION=24.04" > .env
+echo "CUDA_VERSION=12.6.3" >> .env
+echo "PYTHON_VERSION=3.11" >> .env
+
+# Build with custom versions
+docker compose --env-file configs/my-project.env build
+```
+
+Available build args:
+| Variable | Default (GPU) | Default (CPU) |
+|----------|---------------|---------------|
+| `UBUNTU_VERSION` | 22.04 | 24.04 |
+| `CUDA_VERSION` | 12.4.1 | - |
+| `PYTHON_VERSION` | 3.12 | 3.12 |
 
 ### Optional: Git/GitHub config
 
@@ -62,8 +84,8 @@ If you don't have GitHub CLI installed or don't want to mount your local git/Git
 
 ```yaml
 # Optional: mount host git/gh configs if they exist
-# - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
-# - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
+# - ${HOME:-~}/.gitconfig:/home/hannya/.gitconfig:ro,optional
+# - ${HOME:-~}/.config/gh:/home/hannya/.config/gh:ro,optional
 ```
 
 ### 2. Init persistent data (optional)
@@ -104,8 +126,8 @@ Both run simultaneously — no name collisions.
 
 | Config | Image | Container |
 |--------|-------|-----------|
-| `project-alpha.env` | `opencode-uv:gpu` | `project-alpha-gpu` |
-| `project-beta.env` | `opencode-uv:cpu` | `project-beta-cpu` |
+| `project-alpha.env` | `project-alpha:gpu` | `project-alpha-gpu` |
+| `project-beta.env` | `project-beta:cpu` | `project-beta-cpu` |
 
 ---
 
@@ -169,15 +191,13 @@ cp configs/opencode/AGENTS.md-global /path/to/your/repo/AGENTS.md
 
 ### oh-my-openagent (optional)
 
-Installed by default. To skip:
+Installed by default. To skip, pass `--build-arg` during build:
 
 ```bash
-# Via build arg
-docker compose build --build-arg SKIP_OPENAGENT=true
-
-# Or via env file
-echo "SKIP_OPENAGENT=true" >> configs/my-project.env
+docker compose --env-file configs/my-project.env build --build-arg SKIP_OPENAGENT=true
 ```
+
+**Note**: Env files only set runtime environment variables, not build args.
 
 ### Common Commands
 
@@ -201,16 +221,10 @@ See `VERSIONS.md` for tested versions.
 
 ## Skills / Plugins
 
-This container supports optional OpenCode skills/plugins. The only plugin pre-installed is `oh-my-openagent`. To disable it at build time, add to your project `.env`:
+This container supports optional OpenCode skills/plugins. The only plugin pre-installed is `oh-my-openagent`. To skip it during build:
 
-```env
-SKIP_OPENAGENT=true   # Skip oh-my-openagent plugin
-```
-
-Then rebuild:
 ```bash
-docker compose --env-file configs/my-project.env --profile cpu build
-# or --profile gpu for CUDA
+docker compose --env-file configs/my-project.env build --build-arg SKIP_OPENAGENT=true
 ```
 
 ### Suggested: graphify

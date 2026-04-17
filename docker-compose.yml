@@ -18,37 +18,36 @@ services:
       args:
         MYUID: ${MYUID:-1000}
         MYGID: ${MYGID:-1000}
-        DOCKER_USERNAME: ${DOCKER_USERNAME:-hannya}
+        DOCKER_USERNAME: hannya
         UBUNTU_VERSION: ${UBUNTU_VERSION:-22.04}
         CUDA_VERSION: ${CUDA_VERSION:-12.4.1}
         PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
         SKIP_OPENAGENT: ${SKIP_OPENAGENT:-false}
-        SKIP_GRAPHIFY: ${SKIP_GRAPHIFY:-false}
-    image: opencode-uv:${COMPOSE_PROFILE:-gpu}
+    image: ${PROJECT_NAME}:${COMPOSE_PROFILE:-gpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-gpu}
-    hostname: ${HOSTNAME:-naraku}
+    hostname: naraku
     profiles: [ "gpu" ]
 
     stdin_open: true
     tty: true
 
     volumes:
-      - ${PROJECT_PATH:-.}:/home/${DOCKER_USERNAME:-hannya}/workspace:rw
+      - ${PROJECT_PATH:-.}:/home/hannya/workspace:rw
       # To disable persistent bash history, comment the line below
-      - ./.data_history/${PROJECT_NAME}-gpu:/home/${DOCKER_USERNAME:-hannya}/.data_history
+      - ./.data_history/${PROJECT_NAME}-gpu:/home/hannya/.data_history
       # Optional: mount host git/gh configs if they exist
-      - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
-      - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
+      - ${HOME:-~}/.gitconfig:/home/hannya/.gitconfig:ro,optional
+      - ${HOME:-~}/.config/gh:/home/hannya/.config/gh:ro,optional
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
     shm_size: "2gb"
     network_mode: host
 
-    working_dir: /home/${DOCKER_USERNAME:-hannya}/workspace
+    working_dir: /home/hannya/workspace
 
     environment:
-      - HOME=/home/${DOCKER_USERNAME:-hannya}
+      - HOME=/home/hannya
       - MYUID=${MYUID:-1000}
       - MYGID=${MYGID:-1000}
       - TERM=xterm-256color
@@ -97,36 +96,40 @@ services:
       args:
         MYUID: ${MYUID:-1000}
         MYGID: ${MYGID:-1000}
-        DOCKER_USERNAME: ${DOCKER_USERNAME:-hannya}
+        DOCKER_USERNAME: hannya
         UBUNTU_VERSION: ${UBUNTU_VERSION:-24.04}
         PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
         SKIP_OPENAGENT: ${SKIP_OPENAGENT:-false}
-        SKIP_GRAPHIFY: ${SKIP_GRAPHIFY:-false}
-    image: opencode-uv:${COMPOSE_PROFILE:-cpu}
+    image: ${PROJECT_NAME}:${COMPOSE_PROFILE:-cpu}
     container_name: ${PROJECT_NAME}-${COMPOSE_PROFILE:-cpu}
-    hostname: ${HOSTNAME:-naraku}
+    hostname: naraku
     profiles: [ "cpu" ]
 
     stdin_open: true
     tty: true
 
     volumes:
-      - ${PROJECT_PATH:-.}:/home/${DOCKER_USERNAME:-hannya}/workspace:rw
+      - ${PROJECT_PATH:-.}:/home/hannya/workspace:rw
       # To disable persistent bash history, comment the line below
-      - ./.data_history/${PROJECT_NAME}-cpu:/home/${DOCKER_USERNAME:-hannya}/.data_history
+      - ./.data_history/${PROJECT_NAME}-cpu:/home/hannya/.data_history
       # Optional: mount host git/gh configs if they exist
-      - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
-      - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
+      - ${HOME:-~}/.gitconfig:/home/hannya/.gitconfig:ro,optional
+      - ${HOME:-~}/.config/gh:/home/hannya/.config/gh:ro,optional
+
+      - type: bind
+        source: ./configs/opencode
+        target: /home/hannya/.config/opencode
+        read_only: true
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/dri:/dev/dri
 
     shm_size: "2gb"
     network_mode: host
 
-    working_dir: /home/${DOCKER_USERNAME:-hannya}/workspace
+    working_dir: /home/hannya/workspace
 
     environment:
-      - HOME=/home/${DOCKER_USERNAME:-hannya}
+      - HOME=/home/hannya
       - MYUID=${MYUID:-1000}
       - MYGID=${MYGID:-1000}
       - TERM=xterm-256color
