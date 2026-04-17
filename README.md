@@ -57,6 +57,27 @@ The numbers `1000` are your UID and GID.
   ```
   Then rebuild: `docker compose build`
 
+### 1c. Customize build (optional)
+
+To override build-time variables, create a root `.env` file:
+
+```bash
+# Example: override Ubuntu version, CUDA, and Python
+echo "UBUNTU_VERSION=24.04" > .env
+echo "CUDA_VERSION=12.6.3" >> .env
+echo "PYTHON_VERSION=3.11" >> .env
+
+# Build with custom versions
+docker compose --env-file configs/my-project.env build
+```
+
+Available build args:
+| Variable | Default (GPU) | Default (CPU) |
+|----------|---------------|---------------|
+| `UBUNTU_VERSION` | 22.04 | 24.04 |
+| `CUDA_VERSION` | 12.4.1 | - |
+| `PYTHON_VERSION` | 3.12 | 3.12 |
+
 ### Optional: Git/GitHub config
 
 If you don't have GitHub CLI installed or don't want to mount your local git/GitHub config, edit `docker-compose.yml` and comment out these lines:
