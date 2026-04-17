@@ -49,10 +49,11 @@ uid=1000(yours) gid=1000(yours) groups=1000(yours),27(sudo)
 The numbers `1000` are your UID and GID.
 
 - **If both are 1000**: default values work, no changes needed
-- **If different** (e.g. `uid=1001`): edit your `.env`:
-  ```env
-  MYUID=1001
-  MYGID=1001
+- **If different** (e.g. `uid=1001`): create a root `.env` file:
+  ```bash
+  # Create .env in project root (same dir as docker-compose.yml)
+  echo "MYUID=1001" > .env
+  echo "MYGID=1001" >> .env
   ```
   Then rebuild: `docker compose build`
 
@@ -62,8 +63,8 @@ If you don't have GitHub CLI installed or don't want to mount your local git/Git
 
 ```yaml
 # Optional: mount host git/gh configs if they exist
-# - ${HOME:-~}/.gitconfig:/home/${DOCKER_USERNAME:-hannya}/.gitconfig:ro,optional
-# - ${HOME:-~}/.config/gh:/home/${DOCKER_USERNAME:-hannya}/.config/gh:ro,optional
+# - ${HOME:-~}/.gitconfig:/home/hannya/.gitconfig:ro,optional
+# - ${HOME:-~}/.config/gh:/home/hannya/.config/gh:ro,optional
 ```
 
 ### 2. Init persistent data (optional)
@@ -104,8 +105,8 @@ Both run simultaneously — no name collisions.
 
 | Config | Image | Container |
 |--------|-------|-----------|
-| `project-alpha.env` | `opencode-uv:gpu` | `project-alpha-gpu` |
-| `project-beta.env` | `opencode-uv:cpu` | `project-beta-cpu` |
+| `project-alpha.env` | `project-alpha:gpu` | `project-alpha-gpu` |
+| `project-beta.env` | `project-beta:cpu` | `project-beta-cpu` |
 
 ---
 

@@ -68,7 +68,7 @@ RUN curl -fsSL https://bun.sh/install | bash
 # OpenCode
 RUN curl -fsSL https://opencode.ai/install | bash
 
-# oh-my-openagent (installato di default, salta con --build-arg SKIP_OPENAGENT=true)
+# oh-my-openagent (--build-arg SKIP_OPENAGENT=true)
 RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
     bunx oh-my-openagent install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-zen=yes && \
     cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json; \
