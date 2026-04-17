@@ -169,15 +169,13 @@ cp configs/opencode/AGENTS.md-global /path/to/your/repo/AGENTS.md
 
 ### oh-my-openagent (optional)
 
-Installed by default. To skip:
+Installed by default. To skip, pass `--build-arg` during build:
 
 ```bash
-# Via build arg
-docker compose build --build-arg SKIP_OPENAGENT=true
-
-# Or via env file
-echo "SKIP_OPENAGENT=true" >> configs/my-project.env
+docker compose --env-file configs/my-project.env build --build-arg SKIP_OPENAGENT=true
 ```
+
+**Note**: Env files only set runtime environment variables, not build args.
 
 ### Common Commands
 
@@ -201,16 +199,10 @@ See `VERSIONS.md` for tested versions.
 
 ## Skills / Plugins
 
-This container supports optional OpenCode skills/plugins. The only plugin pre-installed is `oh-my-openagent`. To disable it at build time, add to your project `.env`:
+This container supports optional OpenCode skills/plugins. The only plugin pre-installed is `oh-my-openagent`. To skip it during build:
 
-```env
-SKIP_OPENAGENT=true   # Skip oh-my-openagent plugin
-```
-
-Then rebuild:
 ```bash
-docker compose --env-file configs/my-project.env --profile cpu build
-# or --profile gpu for CUDA
+docker compose --env-file configs/my-project.env build --build-arg SKIP_OPENAGENT=true
 ```
 
 ### Suggested: graphify
