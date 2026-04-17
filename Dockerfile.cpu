@@ -1,7 +1,6 @@
 ARG UBUNTU_VERSION=24.04
 ARG PYTHON_VERSION=3.12
 ARG SKIP_OPENAGENT=false
-ARG SKIP_GRAPHIFY=false
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -11,20 +10,13 @@ ARG DOCKER_USERNAME=hannya
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Fix apt sources (works for all Ubuntu versions)
-RUN rm -f /etc/apt/sources.list.d/*.list && \
-    CODENAME=$(. /etc/os-release && echo $VERSION_CODENAME) && \
-    echo "deb http://archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe multiverse" > /etc/apt/sources.list && \
-    echo "deb http://archive.ubuntu.com/ubuntu/ $CODENAME-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb http://archive.ubuntu.com/ubuntu/ $CODENAME-security main restricted universe multiverse" >> /etc/apt/sources.list
+# ── System ────────────────────────────────────────────────────────────────────
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt \
+    apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates nano wget git bash-completion unzip sudo build-essential
 
-# System packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nano git curl wget ca-certificates bash-completion unzip sudo \
-    build-essential libgl1 libglib2.0-0 libxrender1 libxext6 \
-    python3-pip direnv \
-    && rm -rf /var/lib/apt/lists/*
-
+# ── Node.js 22 ────────────────────────────────────────────────────────────────
 RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
 # ── uv ────────────────────────────────────────────────────────────────────────
@@ -69,11 +61,7 @@ RUN if [ "${SKIP_OPENAGENT}" != "true" ]; then \
     cp ~/.config/opencode/oh-my-openagent.json ~/.config/opencode/oh-my-openagent-default.json; \
     fi
 
-# graphify skill
-RUN if [ "${SKIP_GRAPHIFY}" != "true" ]; then \
-    uv pip install --system --break-system-packages graphifyy && \
-    graphify install --platform opencode; \
-    fi
+# graphify skill (not built-in, install manually: uv pip install graphifyy && graphify install --platform opencode)
 
 COPY --chown=${DOCKER_USERNAME}:${MYGID} entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

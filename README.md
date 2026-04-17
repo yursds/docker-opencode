@@ -201,10 +201,9 @@ See `VERSIONS.md` for tested versions.
 
 ## Skills / Plugins
 
-This container includes OpenCode skills/plugins for enhanced functionality. To disable them at build time, add to your project `.env`:
+This container supports optional OpenCode skills/plugins. The only plugin pre-installed is `oh-my-openagent`. To disable it at build time, add to your project `.env`:
 
 ```env
-SKIP_GRAPHIFY=true    # Skip graphify skill
 SKIP_OPENAGENT=true   # Skip oh-my-openagent plugin
 ```
 
@@ -214,9 +213,14 @@ docker compose --env-file configs/my-project.env --profile cpu build
 # or --profile gpu for CUDA
 ```
 
-### graphify
+### Suggested: graphify
 
 Turn any folder of files into a navigable knowledge graph with community detection, audit trail, and three outputs: interactive HTML, GraphRAG-ready JSON, and a plain-language GRAPH_REPORT.md.
+
+**Install manually:**
+```bash
+uv pip install graphifyy && graphify install --platform opencode
+```
 
 **Trigger:** `/graphify`
 

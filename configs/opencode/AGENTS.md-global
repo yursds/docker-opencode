@@ -39,13 +39,6 @@ Global rules for all AI agents in this environment.
 
 ---
 
-## Skills
-
-- **graphify** (`~/.config/opencode/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
-  When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
-
----
-
 ## Code Style
 
 - Follow PEP 8.
