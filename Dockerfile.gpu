@@ -19,7 +19,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     xclip xsel xvfb
 
 # ── Node.js 22 ────────────────────────────────────────────────────────────────
-RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
+RUN curl -fsSL https://nodejs.org/dist/v22.22.2/node-v22.23.3-linux-x64.tar.gz | tar -xz -C /usr/local --strip-components=1
 
 # ── uv ────────────────────────────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
